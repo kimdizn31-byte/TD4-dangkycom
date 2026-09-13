@@ -98,7 +98,7 @@ body {
   color: #444444;
 }
 
-/* Toggle Buttons */
+/* Toggle Buttons (Buổi ăn) */
 .toggle-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -119,6 +119,66 @@ body {
   background: #ffffff;
   color: #000000;
   font-weight: bold;
+}
+
+/* --- DẤU TÍCH CHỌN (CHECKBOX / RADIO) --- */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1a1a1a;
+  border: 1px solid var(--border-color);
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.checkbox-item input[type="radio"] {
+  display: none; /* Ẩn ô tròn mặc định */
+}
+
+/* Khung ô dấu tích tùy chỉnh */
+.custom-check {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--text-muted);
+  border-radius: 4px;
+  display: inline-block;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+/* Khi ô được chọn (Active) */
+.checkbox-item.active {
+  border-color: #ffffff;
+  background: #222222;
+}
+
+.checkbox-item.active .custom-check {
+  background-color: #ffffff;
+  border-color: #ffffff;
+}
+
+/* Dấu tích v bên trong ô */
+.checkbox-item.active .custom-check::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 4px;
+  height: 9px;
+  border: solid #000000;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 
 /* Nút Submit */
