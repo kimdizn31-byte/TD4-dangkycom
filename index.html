@@ -36,12 +36,25 @@
             <input type="hidden" id="mealType" value="Trưa">
           </div>
 
-          <!-- Thời gian ăn -->
+          <!-- Thời gian ăn / Lựa chọn (Đã chuyển thành Dấu tích) -->
           <div class="field">
-            <label class="label">Thời gian</label>
-            <div class="toggle-group" id="mealTimeGroup">
-              <button type="button" class="btn-toggle active" data-value="Đúng giờ">⏰ Đúng giờ</button>
-              <button type="button" class="btn-toggle" data-value="Ăn trễ">⌛ Ăn trễ</button>
+            <label class="label">Trạng thái / Thời gian ăn</label>
+            <div class="checkbox-group" id="mealTimeGroup">
+              <label class="checkbox-item active">
+                <input type="radio" name="mealOption" value="Đúng giờ" checked>
+                <span class="custom-check"></span>
+                <span>⏰ Đúng giờ</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="radio" name="mealOption" value="Ăn trễ">
+                <span class="custom-check"></span>
+                <span>⌛ Ăn trễ</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="radio" name="mealOption" value="Không ăn">
+                <span class="custom-check"></span>
+                <span>❌ Không ăn</span>
+              </label>
             </div>
             <input type="hidden" id="mealTime" value="Đúng giờ">
           </div>
@@ -80,7 +93,7 @@
                 <th>Tên</th>
                 <th>Ngày</th>
                 <th>Buổi</th>
-                <th>Giờ</th>
+                <th>Trạng thái / Giờ</th>
               </tr>
             </thead>
             <tbody id="mealTableBody">
@@ -91,6 +104,9 @@
       </section>
     </main>
   </div>
+  <script src="app.js"></script>
+</body>
+</html>
   <script src="app.js"></script>
 </body>
 </html>
