@@ -111,16 +111,30 @@ function escapeHtml(v){
 refreshChoices();
 loadMeals();
 
-// --- Xử lý Đăng nhập Google & Tự động tạo nút ---
+// --- Xử lý Đăng nhập Google & Trạng thái tài khoản cố định ---
 const mealForm = $("mealForm");
-if (mealForm && !$("btn-google-login")) {
+
+// 1. Khởi tạo giao diện Tài khoản / Đăng nhập
+if (mealForm && !$("auth-container")) {
   mealForm.insertAdjacentHTML("afterbegin", `
-    <button id="btn-google-login" type="button" style="background-color: #4285F4; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; margin-bottom: 15px;">
-      Đăng nhập bằng Gmail
-    </button>
+    <div id="auth-container" style="margin-bottom: 15px;">
+      <button id="btn-google-login" type="button" style="background-color: #4285F4; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold;">
+        Đăng nhập bằng Gmail
+      </button>
+      <div id="user-profile" style="display: none; background: #f0f4ff; padding: 10px; border-radius: 6px; justify-content: space-between; align-items: center;">
+        <div>
+          <div id="user-display-name" style="font-weight: bold; color: #1a73e8; font-size: 14px;"></div>
+          <div id="user-display-email" style="font-size: 12px; color: #5f6368;"></div>
+        </div>
+        <button id="btn-logout" type="button" style="background: transparent; border: 1px solid #d9d9d9; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; color: #555;">
+          Đăng xuất
+        </button>
+      </div>
+    </div>
   `);
 }
 
+// 2. Sự kiện bấm nút Đăng nhập
 const googleBtn = $("btn-google-login");
 if (googleBtn) {
   googleBtn.addEventListener("click", async () => {
@@ -138,17 +152,52 @@ if (googleBtn) {
   });
 }
 
-// Tự động điền tên từ Google sau khi đăng nhập thành công
+// 3. Sự kiện bấm nút Đăng xuất
+const logoutBtn = $("btn-logout");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", async () => {
+    if (sb) {
+      await sb.auth.signOut();
+      window.location.reload();
+    }
+  });
+}
+
+// 4. Kiểm tra phiên đăng nhập và khóa/mở ô nhập tên
 async function checkUserSession() {
   if (!sb) return;
   const { data: { session } } = await sb.auth.getSession();
+  const nameInput = $("name");
+  const loginBtn = $("btn-google-login");
+  const profileDiv = $("user-profile");
+  const nameFieldGroup = nameInput ? nameInput.closest(".field") || nameInput.parentElement : null;
+
   if (session && session.user) {
-    const userFullName = session.user.user_metadata?.full_name || session.user.email;
-    const nameInput = $("name");
-    if (nameInput) {
-      nameInput.value = userFullName;
-    }
+    // ĐÃ ĐĂNG NHẬP:
+    const userName = session.user.user_metadata?.full_name || "Người dùng Google";
+    const userEmail = session.user.email;
+
+    // Ẩn nút đăng nhập Google, hiện thẻ thông tin tài khoản
+    if (loginBtn) loginBtn.style.display = "none";
+    if (profileDiv) profileDiv.style.display = "flex";
+    
+    $("user-display-name").textContent = userName;
+    $("user-display-email").textContent = userEmail;
+
+    // Gán tên vào ô input và ẩn ô nhập "Họ và tên" đi
+    if (nameInput) nameInput.value = userName;
+    if (nameFieldGroup) nameFieldGroup.style.display = "none";
+  } else {
+    // CHƯA ĐĂNG NHẬP:
+    if (loginBtn) loginBtn.style.display = "block";
+    if (profileDiv) profileDiv.style.display = "none";
+    
+    if (nameInput) nameInput.value = "";
+    if (nameFieldGroup) nameFieldGroup.style.display = "block";
   }
+}
+
+checkUserSession();
 }
 
 checkUserSession();
