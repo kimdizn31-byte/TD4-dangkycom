@@ -110,3 +110,45 @@ function escapeHtml(v){
 
 refreshChoices();
 loadMeals();
+
+// --- Xử lý Đăng nhập Google & Tự động tạo nút ---
+const mealForm = $("mealForm");
+if (mealForm && !$("btn-google-login")) {
+  mealForm.insertAdjacentHTML("afterbegin", `
+    <button id="btn-google-login" type="button" style="background-color: #4285F4; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; margin-bottom: 15px;">
+      Đăng nhập bằng Gmail
+    </button>
+  `);
+}
+
+const googleBtn = $("btn-google-login");
+if (googleBtn) {
+  googleBtn.addEventListener("click", async () => {
+    if (!configured || !sb) {
+      alert("Chưa cấu hình Supabase!");
+      return;
+    }
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.href
+      }
+    });
+    if (error) alert("Lỗi đăng nhập: " + error.message);
+  });
+}
+
+// Tự động điền tên từ Google sau khi đăng nhập thành công
+async function checkUserSession() {
+  if (!sb) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (session && session.user) {
+    const userFullName = session.user.user_metadata?.full_name || session.user.email;
+    const nameInput = $("name");
+    if (nameInput) {
+      nameInput.value = userFullName;
+    }
+  }
+}
+
+checkUserSession();
