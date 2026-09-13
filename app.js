@@ -3,7 +3,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const sb = (typeof supabase !== "undefined") ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-// --- 1. ĐĂNG NHẬP GOOGLE & TÀI KHOẢN CỐ ĐỊNH ---
+// --- 1. ĐĂNG NHẬP GOOGLE ---
 function initGoogleAuth() {
   const mealForm = document.getElementById("mealForm");
   if (!mealForm) return;
@@ -28,29 +28,21 @@ function initGoogleAuth() {
     mealForm.insertAdjacentHTML("afterbegin", authHTML);
   }
 
-  const googleBtn = document.getElementById("btn-google-login");
-  if (googleBtn && !googleBtn.dataset.bound) {
-    googleBtn.dataset.bound = "true";
-    googleBtn.addEventListener("click", async () => {
-      if (!sb) return alert("Chưa kết nối Supabase!");
-      const { error } = await sb.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: 'https://td-4-dangkycom.vercel.app' }
-      });
-      if (error) alert("Lỗi đăng nhập: " + error.message);
+  document.getElementById("btn-google-login")?.addEventListener("click", async () => {
+    if (!sb) return alert("Chưa kết nối Supabase!");
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: 'https://td-4-dangkycom.vercel.app' }
     });
-  }
+    if (error) alert("Lỗi đăng nhập: " + error.message);
+  });
 
-  const logoutBtn = document.getElementById("btn-logout");
-  if (logoutBtn && !logoutBtn.dataset.bound) {
-    logoutBtn.dataset.bound = "true";
-    logoutBtn.addEventListener("click", async () => {
-      if (sb) {
-        await sb.auth.signOut();
-        window.location.reload();
-      }
-    });
-  }
+  document.getElementById("btn-logout")?.addEventListener("click", async () => {
+    if (sb) {
+      await sb.auth.signOut();
+      window.location.reload();
+    }
+  });
 
   checkUserSession();
 }
@@ -64,13 +56,11 @@ async function checkUserSession() {
 
   if (session && session.user) {
     const userName = session.user.user_metadata?.full_name || session.user.email;
-    const userEmail = session.user.email;
-
     if (loginBtn) loginBtn.style.display = "none";
     if (profileDiv) profileDiv.style.display = "flex";
 
     document.getElementById("user-display-name").textContent = userName;
-    document.getElementById("user-display-email").textContent = userEmail;
+    document.getElementById("user-display-email").textContent = session.user.email;
     if (nameInput) nameInput.value = userName;
   } else {
     if (loginBtn) loginBtn.style.display = "block";
@@ -79,12 +69,12 @@ async function checkUserSession() {
   }
 }
 
-// --- 2. TẠO LỊCH CÁC THỨ TRONG TUẦN & HẠN ĐĂNG KÝ ---
-function setupWeekDays() {
-  const container = document.getElementById("weekSelector");
-  if (!container) return;
+// --- 2. RENDER BẢNG 7 NGÀY TRONG TUẦN ---
+function renderWeekSchedule() {
+  const tbody = document.getElementById("weekScheduleBody");
+  if (!tbody) return;
 
-  container.innerHTML = "";
+  tbody.innerHTML = "";
   const now = new Date();
   
   const currentDay = now.getDay();
@@ -92,7 +82,7 @@ function setupWeekDays() {
   const monday = new Date(now);
   monday.setDate(now.getDate() + diffToMonday);
 
-  const daysLabel = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+  const daysLabel = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"];
 
   for (let i = 0; i < 7; i++) {
     const d = new Date(monday);
@@ -103,70 +93,32 @@ function setupWeekDays() {
     const day = String(d.getDate()).padStart(2, '0');
     const dateStr = `${year}-${month}-${day}`;
 
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = `day-btn ${i === 0 ? 'active' : ''}`;
-    btn.dataset.date = dateStr;
-    btn.innerHTML = `<span class="day-name">${daysLabel[i]}</span><span class="day-date">${day}/${month}</span>`;
-
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".day-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      document.getElementById("selectedDate").value = dateStr;
-    });
-
-    container.appendChild(btn);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="day-col">
+        ${daysLabel[i]}
+        <span class="d-date">${day}/${month}</span>
+      </td>
+      <td>
+        <select class="meal-select" data-date="${dateStr}" data-type="Trưa">
+          <option value="Không ăn">❌ Không ăn</option>
+          <option value="Đúng giờ" selected>⏰ Đúng giờ</option>
+          <option value="Ăn trễ">⌛ Ăn trễ</option>
+        </select>
+      </td>
+      <td>
+        <select class="meal-select" data-date="${dateStr}" data-type="Tối">
+          <option value="Không ăn" selected>❌ Không ăn</option>
+          <option value="Đúng giờ">⏰ Đúng giờ</option>
+          <option value="Ăn trễ">⌛ Ăn trễ</option>
+        </select>
+      </td>
+    `;
+    tbody.appendChild(tr);
   }
-
-  document.getElementById("selectedDate").value = container.children[0].dataset.date;
 }
 
-// Kiểm tra 10:30 & 17:30
-function isDeadlinePassed(selectedDateStr, mealType) {
-  const now = new Date();
-  const todayStr = now.toISOString().split('T')[0];
-
-  if (selectedDateStr < todayStr) return true;
-
-  if (selectedDateStr === todayStr) {
-    const totalMinutes = now.getHours() * 60 + now.getMinutes();
-    if (mealType === "Trưa" && totalMinutes >= (10 * 60 + 30)) return true;
-    if (mealType === "Tối" && totalMinutes >= (17 * 60 + 30)) return true;
-  }
-  return false;
-}
-
-// Setup nút Toggle (Buổi ăn)
-function setupToggleButtons(groupId, hiddenInputId) {
-  const group = document.getElementById(groupId);
-  if (!group) return;
-  const btns = group.querySelectorAll(".btn-toggle");
-  btns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      btns.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      document.getElementById(hiddenInputId).value = btn.dataset.value;
-    });
-  });
-}
-
-// Setup Ô dấu tích lựa chọn (Đúng giờ / Ăn trễ / Không ăn)
-function setupCheckboxGroup() {
-  const items = document.querySelectorAll(".checkbox-item");
-  items.forEach(item => {
-    item.addEventListener("click", () => {
-      items.forEach(i => i.classList.remove("active"));
-      item.classList.add("active");
-      const radio = item.querySelector("input[type='radio']");
-      if (radio) {
-        radio.checked = true;
-        document.getElementById("mealTime").value = radio.value;
-      }
-    });
-  });
-}
-
-// --- 3. TẢI & THÊM DỮ LIỆU ---
+// --- 3. TẢI VÀ THÊM DỮ LIỆU ---
 async function loadMeals() {
   if (!sb) return;
   const tbody = document.getElementById("mealTableBody");
@@ -209,42 +161,48 @@ async function loadMeals() {
 // KHI TRANG TẢI XONG
 document.addEventListener("DOMContentLoaded", () => {
   initGoogleAuth();
-  setupWeekDays();
-  setupToggleButtons("mealTypeGroup", "mealType");
-  setupCheckboxGroup();
+  renderWeekSchedule();
   loadMeals();
 
   document.getElementById("btnRefresh")?.addEventListener("click", loadMeals);
 
-  // Xử lý nộp Form
+  // Xử lý nộp Form lưu cả tuần
   document.getElementById("mealForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const name = document.getElementById("name").value;
-    const selectedDate = document.getElementById("selectedDate").value;
-    const mealType = document.getElementById("mealType").value;
-    const mealTime = document.getElementById("mealTime").value;
 
     if (!name) return alert("Vui lòng đăng nhập Gmail trước khi đăng ký!");
 
-    if (isDeadlinePassed(selectedDate, mealType)) {
-      return alert(`Đã quá hạn đăng ký cho suất ${mealType} ngày này! (Trưa trước 10h30, Tối trước 17h30)`);
+    const selects = document.querySelectorAll(".meal-select");
+    const inserts = [];
+
+    selects.forEach(select => {
+      const date = select.dataset.date;
+      const type = select.dataset.type;
+      const time = select.value;
+
+      // Chỉ lưu những suất được chọn ăn (Đúng giờ hoặc Ăn trễ)
+      if (time !== "Không ăn") {
+        inserts.push({
+          name: name,
+          meal_date: date,
+          meal_type: type,
+          meal_time: time
+        });
+      }
+    });
+
+    if (inserts.length === 0) {
+      return alert("Bạn chưa chọn suất ăn nào trong tuần!");
     }
 
-    const { error } = await sb.from("meal_registrations").insert([{
-      name: name,
-      meal_date: selectedDate,
-      meal_type: mealType,
-      meal_time: mealTime
-    }]);
+    const { error } = await sb.from("meal_registrations").insert(inserts);
 
     if (error) {
       alert("Lỗi đăng ký: " + error.message);
     } else {
-      alert("Đăng ký thành công!");
+      alert("Đã lưu đăng ký thành công!");
       loadMeals();
-    }
-  });
-});
     }
   });
 });
