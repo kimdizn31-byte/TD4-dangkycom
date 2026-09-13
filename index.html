@@ -3,71 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Đăng ký suất cơm</title>
+  <title>Đăng ký suất cơm theo tuần</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <div class="container">
     <header class="header">
-      <h1>ĐĂNG KÝ SUẤT CƠM</h1>
+      <h1>ĐĂNG KÝ CƠM THEO TUẦN</h1>
     </header>
 
     <main class="main-content">
-      <!-- FORM ĐĂNG KÝ -->
+      <!-- FORM ĐĂNG KÝ BẢNG -->
       <section class="card form-card">
         <form id="mealForm">
           <input type="hidden" id="name" name="name">
-          <input type="hidden" id="selectedDate" name="selectedDate">
 
-          <!-- Chọn Thứ trong tuần -->
-          <div class="field">
-            <label class="label">Chọn ngày ăn (Tuần này)</label>
-            <div class="week-selector" id="weekSelector"></div>
+          <!-- BẢNG LỊCH ĐĂNG KÝ -->
+          <div class="table-schedule-wrapper">
+            <table class="schedule-table">
+              <thead>
+                <tr>
+                  <th>Thứ / Ngày</th>
+                  <th>☀️ Buổi Trưa</th>
+                  <th>🌙 Buổi Tối</th>
+                </tr>
+              </thead>
+              <tbody id="weekScheduleBody">
+                <!-- Javascript sẽ tự động render 7 ngày vào đây -->
+              </tbody>
+            </table>
           </div>
 
-          <!-- Buổi ăn -->
-          <div class="field">
-            <label class="label">Buổi ăn</label>
-            <div class="toggle-group" id="mealTypeGroup">
-              <button type="button" class="btn-toggle active" data-value="Trưa">☀️ Trưa</button>
-              <button type="button" class="btn-toggle" data-value="Tối">🌙 Tối</button>
-            </div>
-            <input type="hidden" id="mealType" value="Trưa">
-          </div>
-
-          <!-- Thời gian ăn / Lựa chọn (Đã chuyển thành Dấu tích) -->
-          <div class="field">
-            <label class="label">Trạng thái / Thời gian ăn</label>
-            <div class="checkbox-group" id="mealTimeGroup">
-              <label class="checkbox-item active">
-                <input type="radio" name="mealOption" value="Đúng giờ" checked>
-                <span class="custom-check"></span>
-                <span>⏰ Đúng giờ</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="radio" name="mealOption" value="Ăn trễ">
-                <span class="custom-check"></span>
-                <span>⌛ Ăn trễ</span>
-              </label>
-              <label class="checkbox-item">
-                <input type="radio" name="mealOption" value="Không ăn">
-                <span class="custom-check"></span>
-                <span>❌ Không ăn</span>
-              </label>
-            </div>
-            <input type="hidden" id="mealTime" value="Đúng giờ">
-          </div>
-
-          <button type="submit" id="btnSubmit" class="btn-primary">+ Đăng ký ngay</button>
-          <div id="formMessage" class="message"></div>
+          <button type="submit" id="btnSubmit" class="btn-primary" style="margin-top: 16px;">💾 Lưu đăng ký tuần này</button>
         </form>
       </section>
 
-      <!-- DANH SÁCH ĐĂNG KÝ -->
+      <!-- DANH SÁCH TỔNG HỢP -->
       <section class="card list-card">
         <div class="list-header">
-          <h2>Danh sách đăng ký</h2>
+          <h2>Danh sách đã đăng ký</h2>
           <button id="btnRefresh" class="btn-secondary">↺ Làm mới</button>
         </div>
 
@@ -93,7 +68,7 @@
                 <th>Tên</th>
                 <th>Ngày</th>
                 <th>Buổi</th>
-                <th>Trạng thái / Giờ</th>
+                <th>Trạng thái</th>
               </tr>
             </thead>
             <tbody id="mealTableBody">
@@ -104,9 +79,6 @@
       </section>
     </main>
   </div>
-  <script src="app.js"></script>
-</body>
-</html>
   <script src="app.js"></script>
 </body>
 </html>
