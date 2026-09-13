@@ -69,18 +69,61 @@ async function checkUserSession() {
   }
 }
 
+// --- HÀM KIỂM TRA MÚI GIỜ VIỆT NAM (UTC+7) ---
+function getVNTime() {
+  const now = new Date();
+  const vnTimeString = now.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" });
+  return new Date(vnTimeString);
+}
+
+// Phút hiện tại trong ngày (ví dụ 8:00 = 480 phút)
+function getCurrentMinutes() {
+  const vnDate = getVNTime();
+  return vnDate.getHours() * 60 + vnDate.getMinutes();
+}
+
+function getTodayStr() {
+  const vnDate = getVNTime();
+  const year = vnDate.getFullYear();
+  const month = String(vnDate.getMonth() + 1).padStart(2, '0');
+  const day = String(vnDate.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// 1. Kiểm tra hạn ĐĂNG KÝ MỚI (Phải trước 8h00 sáng ngày hôm đó)
+function isRegistrationDeadlinePassed(selectedDateStr) {
+  const todayStr = getTodayStr();
+  if (selectedDateStr < todayStr) return true; // Ngày quá khứ
+  if (selectedDateStr === todayStr) {
+    return getCurrentMinutes() >= (8 * 60); // Sau 8h00
+  }
+  return false;
+}
+
+// 2. Kiểm tra hạn THAY ĐỔI TRẠNG THÁI (Trưa: 10h30, Tối: 17h30)
+function isChangeDeadlinePassed(selectedDateStr, mealType) {
+  const todayStr = getTodayStr();
+  if (selectedDateStr < todayStr) return true; // Ngày quá khứ
+  if (selectedDateStr === todayStr) {
+    const minutes = getCurrentMinutes();
+    if (mealType === "Trưa" && minutes >= (10 * 60 + 30)) return true; // Quá 10h30
+    if (mealType === "Tối" && minutes >= (17 * 60 + 30)) return true;  // Quá 17h30
+  }
+  return false;
+}
+
 // --- 2. RENDER BẢNG 7 NGÀY TRONG TUẦN ---
 function renderWeekSchedule() {
   const tbody = document.getElementById("weekScheduleBody");
   if (!tbody) return;
 
   tbody.innerHTML = "";
-  const now = new Date();
+  const vnNow = getVNTime();
   
-  const currentDay = now.getDay();
+  const currentDay = vnNow.getDay();
   const diffToMonday = (currentDay === 0 ? -6 : 1 - currentDay);
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + diffToMonday);
+  const monday = new Date(vnNow);
+  monday.setDate(vnNow.getDate() + diffToMonday);
 
   const daysLabel = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"];
 
@@ -93,6 +136,10 @@ function renderWeekSchedule() {
     const day = String(d.getDate()).padStart(2, '0');
     const dateStr = `${year}-${month}-${day}`;
 
+    const regPassed = isRegistrationDeadlinePassed(dateStr);
+    const lunchChangePassed = isChangeDeadlinePassed(dateStr, "Trưa");
+    const dinnerChangePassed = isChangeDeadlinePassed(dateStr, "Tối");
+
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td class="day-col">
@@ -100,14 +147,14 @@ function renderWeekSchedule() {
         <span class="d-date">${day}/${month}</span>
       </td>
       <td>
-        <select class="meal-select" data-date="${dateStr}" data-type="Trưa">
+        <select class="meal-select" data-date="${dateStr}" data-type="Trưa" ${lunchChangePassed ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>
           <option value="Không ăn">❌ Không ăn</option>
-          <option value="Đúng giờ" selected>⏰ Đúng giờ</option>
+          <option value="Đúng giờ" ${!regPassed ? 'selected' : ''}>⏰ Đúng giờ</option>
           <option value="Ăn trễ">⌛ Ăn trễ</option>
         </select>
       </td>
       <td>
-        <select class="meal-select" data-date="${dateStr}" data-type="Tối">
+        <select class="meal-select" data-date="${dateStr}" data-type="Tối" ${dinnerChangePassed ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>
           <option value="Không ăn" selected>❌ Không ăn</option>
           <option value="Đúng giờ">⏰ Đúng giờ</option>
           <option value="Ăn trễ">⌛ Ăn trễ</option>
@@ -118,7 +165,7 @@ function renderWeekSchedule() {
   }
 }
 
-// --- 3. TẢI VÀ THÊM DỮ LIỆU ---
+// --- 3. TẢI VÀ LƯU DỮ LIỆU ---
 async function loadMeals() {
   if (!sb) return;
   const tbody = document.getElementById("mealTableBody");
@@ -166,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("btnRefresh")?.addEventListener("click", loadMeals);
 
-  // Xử lý nộp Form lưu cả tuần
+  // Xử lý nộp Form
   document.getElementById("mealForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const name = document.getElementById("name").value;
@@ -176,12 +223,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const selects = document.querySelectorAll(".meal-select");
     const inserts = [];
 
-    selects.forEach(select => {
+    for (const select of selects) {
       const date = select.dataset.date;
       const type = select.dataset.type;
       const time = select.value;
 
-      // Chỉ lưu những suất được chọn ăn (Đúng giờ hoặc Ăn trễ)
+      // 1. Nếu đăng ký ăn mới (Đúng giờ / Ăn trễ) nhưng đã quá 8h00 sáng -> Chặn
+      if (time !== "Không ăn" && isRegistrationDeadlinePassed(date)) {
+        alert(`Đã quá 8h00 sáng! Không thể đăng ký thêm suất ăn ngày ${date}.`);
+        return;
+      }
+
+      // 2. Nếu đã quá hạn thay đổi (Trưa sau 10h30, Tối sau 17h30) -> Bỏ qua không cho sửa
+      if (isChangeDeadlinePassed(date, type)) {
+        continue;
+      }
+
       if (time !== "Không ăn") {
         inserts.push({
           name: name,
@@ -190,18 +247,18 @@ document.addEventListener("DOMContentLoaded", () => {
           meal_time: time
         });
       }
-    });
+    }
 
     if (inserts.length === 0) {
-      return alert("Bạn chưa chọn suất ăn nào trong tuần!");
+      return alert("Không có thay đổi hợp lệ nào được lưu!");
     }
 
     const { error } = await sb.from("meal_registrations").insert(inserts);
 
     if (error) {
-      alert("Lỗi đăng ký: " + error.message);
+      alert("Lỗi lưu dữ liệu: " + error.message);
     } else {
-      alert("Đã lưu đăng ký thành công!");
+      alert("Lưu thành công!");
       loadMeals();
     }
   });
