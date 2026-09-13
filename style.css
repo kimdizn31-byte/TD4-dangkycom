@@ -185,7 +185,3 @@ th {
   text-align: center;
   color: var(--text-muted);
 }
-  .week-selector {
-    grid-template-columns: repeat(7, 1fr);
-  }
-}
