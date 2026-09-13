@@ -1,13 +1,36 @@
 const SUPABASE_URL = "https://usgecirqtmoldcvvwcxk.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable__qbft3pHINGK3sweQHL7W_DLC5z"; 
+const SUPABASE_ANON_KEY = "sb_publishable__qbft3pHINGK3sweQHL7W_DLC5z";
 
 const sb = (typeof supabase !== "undefined") ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 document.addEventListener("DOMContentLoaded", () => {
   initGoogleAuth();
-  generateWeekDays();
   listenAuthChanges();
 });
+
+function initGoogleAuth() {
+  document.getElementById("btn-google-login")?.addEventListener("click", async () => {
+    if (!sb) return alert("Chưa kết nối Supabase!");
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: "https://td-4-dangkycom.vercel.app"
+      }
+    });
+    if (error) alert("Lỗi Google Auth: " + error.message);
+  });
+}
+
+function listenAuthChanges() {
+  if (!sb) return;
+  
+  sb.auth.onAuthStateChange((event, session) => {
+    if (session?.user) {
+      document.getElementById("btn-google-login").style.display = "none";
+      alert("Đăng nhập thành công: " + session.user.email);
+    }
+  });
+}
 
 function initGoogleAuth() {
   const mealForm = document.getElementById("mealForm");
