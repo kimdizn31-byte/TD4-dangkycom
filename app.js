@@ -260,6 +260,24 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       alert("Lưu thành công!");
       loadMeals();
+
+      document.getElementById("btn-google-login")?.addEventListener("click", async () => {
+  if (typeof supabase === 'undefined') {
+    alert("Lỗi: Thư viện Supabase chưa được tải!");
+    return;
+  }
+  
+  const { data, error } = await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin
+    }
+  });
+
+  if (error) {
+    alert("Không thể đăng nhập: " + error.message);
+  }
+});
     }
   });
 });
