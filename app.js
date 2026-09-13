@@ -131,7 +131,7 @@ if (googleBtn) {
     const { error } = await sb.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.href
+        redirectTo: 'https://td-4-dangkycom.vercel.app'
       }
     });
     if (error) alert("Lỗi đăng nhập: " + error.message);
