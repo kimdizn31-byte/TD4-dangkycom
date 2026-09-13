@@ -1,222 +1,96 @@
-:root {
-  --bg-color: #000000;
-  --card-bg: #111111;
-  --border-color: #222222;
-  --text-main: #ffffff;
-  --text-muted: #888888;
-}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng ký suất cơm</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>ĐĂNG KÝ SUẤT CƠM</h1>
+    </header>
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}
+    <main class="main-content">
+      <!-- FORM ĐĂNG KÝ -->
+      <section class="card form-card">
+        <form id="mealForm">
+          <input type="hidden" id="name" name="name">
+          <input type="hidden" id="selectedDate" name="selectedDate">
 
-body {
-  background-color: var(--bg-color);
-  color: var(--text-main);
-  padding: 12px;
-  display: flex;
-  justify-content: center;
-}
+          <!-- Chọn Thứ trong tuần -->
+          <div class="field">
+            <label class="label">Chọn ngày ăn (Tuần này)</label>
+            <div class="week-selector" id="weekSelector"></div>
+          </div>
 
-.container {
-  width: 100%;
-  max-width: 600px;
-}
+          <!-- Buổi ăn -->
+          <div class="field">
+            <label class="label">Buổi ăn</label>
+            <div class="toggle-group" id="mealTypeGroup">
+              <button type="button" class="btn-toggle active" data-value="Trưa">☀️ Trưa</button>
+              <button type="button" class="btn-toggle" data-value="Tối">🌙 Tối</button>
+            </div>
+            <input type="hidden" id="mealType" value="Trưa">
+          </div>
 
-.header h1 {
-  font-size: 18px;
-  font-weight: 800;
-  margin: 12px 0 20px 0;
-  text-align: center;
-  letter-spacing: 1px;
-}
+          <!-- Thời gian ăn -->
+          <div class="field">
+            <label class="label">Thời gian</label>
+            <div class="toggle-group" id="mealTimeGroup">
+              <button type="button" class="btn-toggle active" data-value="Đúng giờ">⏰ Đúng giờ</button>
+              <button type="button" class="btn-toggle" data-value="Ăn trễ">⌛ Ăn trễ</button>
+            </div>
+            <input type="hidden" id="mealTime" value="Đúng giờ">
+          </div>
 
-.main-content {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+          <button type="submit" id="btnSubmit" class="btn-primary">+ Đăng ký ngay</button>
+          <div id="formMessage" class="message"></div>
+        </form>
+      </section>
 
-.card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 16px;
-}
+      <!-- DANH SÁCH ĐĂNG KÝ -->
+      <section class="card list-card">
+        <div class="list-header">
+          <h2>Danh sách đăng ký</h2>
+          <button id="btnRefresh" class="btn-secondary">↺ Làm mới</button>
+        </div>
 
-.field {
-  margin-bottom: 16px;
-}
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span class="stat-num" id="statTotal">0</span>
+            <span class="stat-label">Tổng suất</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-num" id="statLunch">0</span>
+            <span class="stat-label">Trưa</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-num" id="statDinner">0</span>
+            <span class="stat-label">Tối</span>
+          </div>
+        </div>
 
-.label {
-  display: block;
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  font-weight: 600;
-}
-
-/* Nút chọn Thứ */
-.week-selector {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-}
-
-.day-btn {
-  background: #1a1a1a;
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  padding: 10px 4px;
-  border-radius: 8px;
-  cursor: pointer;
-  text-align: center;
-}
-
-.day-btn .day-name {
-  font-weight: bold;
-  font-size: 13px;
-  display: block;
-}
-
-.day-btn .day-date {
-  font-size: 10px;
-  color: var(--text-muted);
-}
-
-.day-btn.active {
-  background: #ffffff;
-  color: #000000;
-  border-color: #ffffff;
-}
-
-.day-btn.active .day-date {
-  color: #444444;
-}
-
-/* Toggle Buttons */
-.toggle-group {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.btn-toggle {
-  background: #1a1a1a;
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.btn-toggle.active {
-  background: #ffffff;
-  color: #000000;
-  font-weight: bold;
-}
-
-/* Nút Submit */
-.btn-primary {
-  width: 100%;
-  background: #ffffff;
-  color: #000000;
-  border: none;
-  padding: 14px;
-  border-radius: 8px;
-  font-weight: bold;
-  font-size: 14px;
-  cursor: pointer;
-  margin-top: 4px;
-}
-
-.btn-secondary {
-  background: transparent;
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-/* Thống kê */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.stat-box {
-  background: #161616;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 12px;
-  text-align: center;
-}
-
-.stat-num {
-  display: block;
-  font-size: 20px;
-  font-weight: bold;
-}
-
-.stat-label {
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.list-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.list-header h2 {
-  font-size: 15px;
-}
-
-.table-wrapper {
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-th, td {
-  padding: 10px 8px;
-  text-align: left;
-  border-bottom: 1px solid var(--border-color);
-}
-
-th {
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.text-center {
-  text-align: center;
-  color: var(--text-muted);
-}
-
-.message {
-  margin-top: 10px;
-  font-size: 12px;
-  text-align: center;
-}
-
-@media (min-width: 640px) {
-  .week-selector {
-    grid-template-columns: repeat(7, 1fr);
-  }
-}
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Tên</th>
+                <th>Ngày</th>
+                <th>Buổi</th>
+                <th>Giờ</th>
+              </tr>
+            </thead>
+            <tbody id="mealTableBody">
+              <tr><td colspan="4" class="text-center">Đang tải...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
