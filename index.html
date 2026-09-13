@@ -3,82 +3,60 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Đăng ký suất cơm theo tuần</title>
+  <title>Đăng Ký Cơm Theo Tuần</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Thư viện Supabase JS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <div class="container">
-    <header class="header">
-      <h1>ĐĂNG KÝ CƠM THEO TUẦN</h1>
-    </header>
+    <h1>ĐĂNG KÝ CƠM THEO TUẦN</h1>
 
-    <main class="main-content">
-      <!-- FORM ĐĂNG KÝ BẢNG -->
-      <section class="card form-card">
-        <form id="mealForm">
-          <input type="hidden" id="name" name="name">
+    <form id="mealForm">
+      <!-- Khu vực Đăng nhập / User Info sẽ tự động inject ở đây -->
+      
+      <div class="table-header">
+        <div style="width: 30%;">Thứ / Ngày</div>
+        <div style="width: 33%;">☀️ Buổi Trưa</div>
+        <div style="width: 33%;">🌙 Buổi Tối</div>
+      </div>
 
-          <!-- BẢNG LỊCH ĐĂNG KÝ -->
-          <div class="table-schedule-wrapper">
-            <table class="schedule-table">
-              <thead>
-                <tr>
-                  <th>Thứ / Ngày</th>
-                  <th>☀️ Buổi Trưa</th>
-                  <th>🌙 Buổi Tối</th>
-                </tr>
-              </thead>
-              <tbody id="weekScheduleBody">
-                <!-- Javascript sẽ tự động render 7 ngày vào đây -->
-              </tbody>
-            </table>
-          </div>
+      <!-- Danh sách các ngày trong tuần sẽ render vào đây -->
+      <div id="weekDaysContainer"></div>
 
-          <button type="submit" id="btnSubmit" class="btn-primary" style="margin-top: 16px;">💾 Lưu đăng ký tuần này</button>
-        </form>
-      </section>
+      <button type="submit" id="btn-save" style="margin-top: 15px; width: 100%; padding: 12px; background: #ffffff; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+        💾 Lưu đăng ký tuần này
+      </button>
+    </form>
 
-      <!-- DANH SÁCH TỔNG HỢP -->
-      <section class="card list-card">
-        <div class="list-header">
-          <h2>Danh sách đã đăng ký</h2>
-          <button id="btnRefresh" class="btn-secondary">↺ Làm mới</button>
+    <!-- Danh sách đã đăng ký -->
+    <div style="margin-top: 30px; background: #111; padding: 15px; border-radius: 8px; border: 1px solid #222;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 style="margin: 0; font-size: 16px;">Danh sách đã đăng ký</h3>
+        <button id="btn-refresh" type="button" style="background: #222; color: #fff; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">🔄 Làm mới</button>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <div style="flex: 1; background: #181818; padding: 10px; border-radius: 6px; text-align: center;">
+          <strong id="stat-total" style="font-size: 18px; color: #fff;">0</strong>
+          <div style="font-size: 11px; color: #777;">Tổng suất</div>
         </div>
-
-        <div class="stats-grid">
-          <div class="stat-box">
-            <span class="stat-num" id="statTotal">0</span>
-            <span class="stat-label">Tổng suất</span>
-          </div>
-          <div class="stat-box">
-            <span class="stat-num" id="statLunch">0</span>
-            <span class="stat-label">Trưa</span>
-          </div>
-          <div class="stat-box">
-            <span class="stat-num" id="statDinner">0</span>
-            <span class="stat-label">Tối</span>
-          </div>
+        <div style="flex: 1; background: #181818; padding: 10px; border-radius: 6px; text-align: center;">
+          <strong id="stat-lunch" style="font-size: 18px; color: #fff;">0</strong>
+          <div style="font-size: 11px; color: #777;">Trưa</div>
         </div>
-
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Tên</th>
-                <th>Ngày</th>
-                <th>Buổi</th>
-                <th>Trạng thái</th>
-              </tr>
-            </thead>
-            <tbody id="mealTableBody">
-              <tr><td colspan="4" class="text-center">Đang tải...</td></tr>
-            </tbody>
-          </table>
+        <div style="flex: 1; background: #181818; padding: 10px; border-radius: 6px; text-align: center;">
+          <strong id="stat-dinner" style="font-size: 18px; color: #fff;">0</strong>
+          <div style="font-size: 11px; color: #777;">Tối</div>
         </div>
-      </section>
-    </main>
+      </div>
+
+      <div id="registrations-list" style="font-size: 13px; color: #ccc;">
+        Đang tải...
+      </div>
+    </div>
   </div>
+
   <script src="app.js"></script>
 </body>
 </html>
