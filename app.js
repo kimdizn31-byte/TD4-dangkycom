@@ -1,6 +1,5 @@
 const SUPABASE_URL = "https://usgecirqtmoldcvvwcxk.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzZ2VjaXJxdG1vbGRjdnd3Y3hrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEzMjQ5NTUsImV4cCI6MjA1Njk0MDk1NX0.6EaR6Q7Jd8k_H0G5h0R0O6W0N5k_G0H5h0R0O6W0N5k";
-
+const SUPABASE_ANON_KEY = "sb_publishable__qbft3pHINGK3sweQHL7W_DLC5z..."; // Hoặc mã legacy anon bắt đầu bằng eyJ...
 const sb = (typeof supabase !== "undefined") ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 // --- 1. ĐĂNG NHẬP GOOGLE ---
