@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Đăng ký suất cơm</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="hero">
+  <div class="wrap hero-inner">
+    <div>
+      <div class="eyebrow">MEAL BOOKING</div>
+      <h1>🍚 Đăng ký suất cơm</h1>
+      <p>Đăng ký cơm trưa hoặc tối, chọn đúng giờ hoặc ăn trễ.</p>
+    </div>
+    <div class="hero-badge">☀️ Trưa &nbsp; 🌙 Tối</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="grid">
+    <div class="card">
+      <h2>Đăng ký suất cơm</h2>
+      <form id="mealForm">
+        <label>Họ và tên
+          <input id="name" required maxlength="80" placeholder="Ví dụ: Nguyễn Văn A">
+        </label>
+
+        <label>Ngày ăn
+          <input id="date" type="date" required>
+        </label>
+
+        <fieldset>
+          <legend>Buổi ăn</legend>
+          <div class="choices">
+            <label class="choice active"><input type="radio" name="meal" value="Trưa" checked>☀️ <b>Trưa</b></label>
+            <label class="choice"><input type="radio" name="meal" value="Tối">🌙 <b>Tối</b></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Thời gian</legend>
+          <div class="choices">
+            <label class="choice active"><input type="radio" name="time" value="Đúng giờ" checked>⏰ <b>Đúng giờ</b></label>
+            <label class="choice"><input type="radio" name="time" value="Ăn trễ">🕐 <b>Ăn trễ</b></label>
+          </div>
+        </fieldset>
+
+        <label>Số suất
+          <input id="quantity" type="number" min="1" max="20" value="1" required>
+        </label>
+
+        <label>Ghi chú (không bắt buộc)
+          <input id="note" maxlength="200" placeholder="Ví dụ: ăn chay">
+        </label>
+
+        <button class="primary" type="submit">+ Đăng ký ngay</button>
+        <p id="status" class="status"></p>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="section-head">
+        <div>
+          <h2>Danh sách đăng ký</h2>
+          <p class="muted">Dữ liệu dùng chung trên Supabase.</p>
+        </div>
+        <button id="refresh" class="secondary">↻ Làm mới</button>
+      </div>
+
+      <div class="stats">
+        <div><b id="total">0</b><span>Tổng suất</span></div>
+        <div><b id="lunch">0</b><span>Suất trưa</span></div>
+        <div><b id="dinner">0</b><span>Suất tối</span></div>
+      </div>
+
+      <div class="filters">
+        <input id="filterDate" type="date">
+        <select id="filterMeal">
+          <option value="">Tất cả buổi</option>
+          <option value="Trưa">Trưa</option>
+          <option value="Tối">Tối</option>
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tên</th><th>Ngày</th><th>Buổi</th><th>Giờ</th><th>Suất</th><th>Ghi chú</th></tr></thead>
+          <tbody id="rows"><tr><td colspan="6" class="empty">Đang tải...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>Meal Booking • Bản demo kết nối Supabase</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+</body>
+</html>
