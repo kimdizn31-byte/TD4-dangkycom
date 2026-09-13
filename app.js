@@ -112,83 +112,93 @@ refreshChoices();
 loadMeals();
 
 // --- Xử lý Đăng nhập Google & Trạng thái tài khoản cố định ---
-const mealForm = $("mealForm");
+function initGoogleAuth() {
+  const mealForm = document.getElementById("mealForm") || document.querySelector("form");
+  if (!mealForm) return;
 
-// 1. Khởi tạo giao diện Tài khoản / Đăng nhập
-if (mealForm && !$("auth-container")) {
-  mealForm.insertAdjacentHTML("afterbegin", `
-    <div id="auth-container" style="margin-bottom: 15px;">
-      <button id="btn-google-login" type="button" style="background-color: #4285F4; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold;">
-        Đăng nhập bằng Gmail
-      </button>
-      <div id="user-profile" style="display: none; background: #f0f4ff; padding: 10px; border-radius: 6px; justify-content: space-between; align-items: center;">
-        <div>
-          <div id="user-display-name" style="font-weight: bold; color: #1a73e8; font-size: 14px;"></div>
-          <div id="user-display-email" style="font-size: 12px; color: #5f6368;"></div>
-        </div>
-        <button id="btn-logout" type="button" style="background: transparent; border: 1px solid #d9d9d9; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; color: #555;">
-          Đăng xuất
+  // 1. Chèn giao diện Đăng nhập / Profile vào đầu form nếu chưa có
+  if (!document.getElementById("auth-container")) {
+    const authHTML = `
+      <div id="auth-container" style="margin-bottom: 15px;">
+        <button id="btn-google-login" type="button" style="background-color: #4285F4; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold;">
+          Đăng nhập bằng Gmail
         </button>
+        <div id="user-profile" style="display: none; background: #f0f4ff; padding: 10px; border-radius: 6px; justify-content: space-between; align-items: center;">
+          <div>
+            <div id="user-display-name" style="font-weight: bold; color: #1a73e8; font-size: 14px;"></div>
+            <div id="user-display-email" style="font-size: 12px; color: #5f6368;"></div>
+          </div>
+          <button id="btn-logout" type="button" style="background: transparent; border: 1px solid #d9d9d9; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; color: #555;">
+            Đăng xuất
+          </button>
+        </div>
       </div>
-    </div>
-  `);
-}
+    `;
+    mealForm.insertAdjacentHTML("afterbegin", authHTML);
+  }
 
-// 2. Sự kiện bấm nút Đăng nhập
-const googleBtn = $("btn-google-login");
-if (googleBtn) {
-  googleBtn.addEventListener("click", async () => {
-    if (!configured || !sb) {
-      alert("Chưa cấu hình Supabase!");
-      return;
-    }
-    const { error } = await sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: 'https://td-4-dangkycom.vercel.app'
+  // 2. Gán sự kiện cho nút Đăng nhập
+  const googleBtn = document.getElementById("btn-google-login");
+  if (googleBtn && !googleBtn.dataset.bound) {
+    googleBtn.dataset.bound = "true";
+    googleBtn.addEventListener("click", async () => {
+      if (!configured || !sb) {
+        alert("Chưa cấu hình Supabase!");
+        return;
+      }
+      const { error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: 'https://td-4-dangkycom.vercel.app'
+        }
+      });
+      if (error) alert("Lỗi đăng nhập: " + error.message);
+    });
+  }
+
+  // 3. Gán sự kiện cho nút Đăng xuất
+  const logoutBtn = document.getElementById("btn-logout");
+  if (logoutBtn && !logoutBtn.dataset.bound) {
+    logoutBtn.dataset.bound = "true";
+    logoutBtn.addEventListener("click", async () => {
+      if (sb) {
+        await sb.auth.signOut();
+        window.location.reload();
       }
     });
-    if (error) alert("Lỗi đăng nhập: " + error.message);
-  });
+  }
+
+  // 4. Kiểm tra phiên đăng nhập để cập nhật giao diện
+  checkUserSession();
 }
 
-// 3. Sự kiện bấm nút Đăng xuất
-const logoutBtn = $("btn-logout");
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", async () => {
-    if (sb) {
-      await sb.auth.signOut();
-      window.location.reload();
-    }
-  });
-}
-
-// 4. Kiểm tra phiên đăng nhập và khóa/mở ô nhập tên
 async function checkUserSession() {
   if (!sb) return;
   const { data: { session } } = await sb.auth.getSession();
-  const nameInput = $("name");
-  const loginBtn = $("btn-google-login");
-  const profileDiv = $("user-profile");
-  const nameFieldGroup = nameInput ? nameInput.closest(".field") || nameInput.parentElement : null;
+  const nameInput = document.getElementById("name") || document.querySelector("input[name='name']");
+  const loginBtn = document.getElementById("btn-google-login");
+  const profileDiv = document.getElementById("user-profile");
+  
+  // Tìm khung chứa ô Họ và tên để ẩn/hiện
+  const nameFieldGroup = nameInput ? (nameInput.closest(".field") || nameInput.parentElement) : null;
 
   if (session && session.user) {
-    // ĐÃ ĐĂNG NHẬP:
-    const userName = session.user.user_metadata?.full_name || "Người dùng Google";
+    // ĐÃ ĐĂNG NHẬP
+    const userName = session.user.user_metadata?.full_name || session.user.email;
     const userEmail = session.user.email;
 
-    // Ẩn nút đăng nhập Google, hiện thẻ thông tin tài khoản
     if (loginBtn) loginBtn.style.display = "none";
     if (profileDiv) profileDiv.style.display = "flex";
     
-    $("user-display-name").textContent = userName;
-    $("user-display-email").textContent = userEmail;
+    const nameEl = document.getElementById("user-display-name");
+    const emailEl = document.getElementById("user-display-email");
+    if (nameEl) nameEl.textContent = userName;
+    if (emailEl) emailEl.textContent = userEmail;
 
-    // Gán tên vào ô input và ẩn ô nhập "Họ và tên" đi
     if (nameInput) nameInput.value = userName;
-    if (nameFieldGroup) nameFieldGroup.style.display = "none";
+    if (nameFieldGroup) nameFieldGroup.style.display = "none"; // Ẩn ô Họ và tên
   } else {
-    // CHƯA ĐĂNG NHẬP:
+    // CHƯA ĐĂNG NHẬP
     if (loginBtn) loginBtn.style.display = "block";
     if (profileDiv) profileDiv.style.display = "none";
     
@@ -197,7 +207,9 @@ async function checkUserSession() {
   }
 }
 
-checkUserSession();
+// Chạy hàm khi trang web đã tải xong
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initGoogleAuth);
+} else {
+  initGoogleAuth();
 }
-
-checkUserSession();
