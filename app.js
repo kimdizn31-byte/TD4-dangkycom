@@ -121,7 +121,7 @@ function setupWeekDays() {
   document.getElementById("selectedDate").value = container.children[0].dataset.date;
 }
 
-// Kiểm tra hạn 10:30 & 17:30
+// Kiểm tra 10:30 & 17:30
 function isDeadlinePassed(selectedDateStr, mealType) {
   const now = new Date();
   const todayStr = now.toISOString().split('T')[0];
@@ -136,7 +136,7 @@ function isDeadlinePassed(selectedDateStr, mealType) {
   return false;
 }
 
-// Setup nút Toggle
+// Setup nút Toggle (Buổi ăn)
 function setupToggleButtons(groupId, hiddenInputId) {
   const group = document.getElementById(groupId);
   if (!group) return;
@@ -146,6 +146,22 @@ function setupToggleButtons(groupId, hiddenInputId) {
       btns.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       document.getElementById(hiddenInputId).value = btn.dataset.value;
+    });
+  });
+}
+
+// Setup Ô dấu tích lựa chọn (Đúng giờ / Ăn trễ / Không ăn)
+function setupCheckboxGroup() {
+  const items = document.querySelectorAll(".checkbox-item");
+  items.forEach(item => {
+    item.addEventListener("click", () => {
+      items.forEach(i => i.classList.remove("active"));
+      item.classList.add("active");
+      const radio = item.querySelector("input[type='radio']");
+      if (radio) {
+        radio.checked = true;
+        document.getElementById("mealTime").value = radio.value;
+      }
     });
   });
 }
@@ -168,9 +184,11 @@ async function loadMeals() {
     tbody.innerHTML = `<tr><td colspan="4" class="text-center">Chưa có đăng ký nào.</td></tr>`;
   } else {
     data.forEach(item => {
-      total++;
-      if (item.meal_type === "Trưa") lunch++;
-      if (item.meal_type === "Tối") dinner++;
+      if (item.meal_time !== "Không ăn") {
+        total++;
+        if (item.meal_type === "Trưa") lunch++;
+        if (item.meal_type === "Tối") dinner++;
+      }
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
@@ -193,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initGoogleAuth();
   setupWeekDays();
   setupToggleButtons("mealTypeGroup", "mealType");
-  setupToggleButtons("mealTimeGroup", "mealTime");
+  setupCheckboxGroup();
   loadMeals();
 
   document.getElementById("btnRefresh")?.addEventListener("click", loadMeals);
@@ -224,6 +242,9 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       alert("Đăng ký thành công!");
       loadMeals();
+    }
+  });
+});
     }
   });
 });
