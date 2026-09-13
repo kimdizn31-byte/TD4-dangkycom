@@ -16,20 +16,20 @@
 body {
   background-color: var(--bg-color);
   color: var(--text-main);
-  padding: 12px;
+  padding: 8px;
   display: flex;
   justify-content: center;
 }
 
 .container {
   width: 100%;
-  max-width: 600px;
+  max-width: 700px;
 }
 
 .header h1 {
   font-size: 18px;
   font-weight: 800;
-  margin: 12px 0 20px 0;
+  margin: 12px 0 16px 0;
   text-align: center;
   letter-spacing: 1px;
 }
@@ -44,144 +44,63 @@ body {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  padding: 16px;
+  padding: 12px;
 }
 
-.field {
-  margin-bottom: 16px;
+/* BẢNG LỊCH ĐĂNG KÝ */
+.table-schedule-wrapper {
+  overflow-x: auto;
 }
 
-.label {
-  display: block;
+.schedule-table {
+  width: 100%;
+  border-collapse: collapse;
   font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  font-weight: 600;
 }
 
-/* Nút chọn Thứ */
-.week-selector {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-}
-
-.day-btn {
-  background: #1a1a1a;
+.schedule-table th, .schedule-table td {
+  padding: 8px 4px;
   border: 1px solid var(--border-color);
-  color: var(--text-main);
-  padding: 10px 4px;
-  border-radius: 8px;
-  cursor: pointer;
   text-align: center;
 }
 
-.day-btn .day-name {
+.schedule-table th {
+  background: #181818;
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.day-col {
   font-weight: bold;
-  font-size: 13px;
+  background: #141414;
+}
+
+.day-col .d-date {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: normal;
   display: block;
 }
 
-.day-btn .day-date {
-  font-size: 10px;
-  color: var(--text-muted);
-}
-
-.day-btn.active {
-  background: #ffffff;
-  color: #000000;
-  border-color: #ffffff;
-}
-
-.day-btn.active .day-date {
-  color: #444444;
-}
-
-/* Toggle Buttons (Buổi ăn) */
-.toggle-group {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.btn-toggle {
+/* Các thanh chọn tùy chọn (Select dropdown) trong ô */
+.meal-select {
   background: #1a1a1a;
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 13px;
+  color: #ffffff;
+  border: 1px solid #333333;
+  padding: 6px 4px;
+  border-radius: 6px;
+  font-size: 11px;
+  width: 100%;
+  outline: none;
   cursor: pointer;
 }
 
-.btn-toggle.active {
-  background: #ffffff;
-  color: #000000;
-  font-weight: bold;
+.meal-select option {
+  background: #111111;
+  color: #ffffff;
 }
 
-/* --- DẤU TÍCH CHỌN (CHECKBOX / RADIO) --- */
-.checkbox-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.checkbox-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: #1a1a1a;
-  border: 1px solid var(--border-color);
-  padding: 10px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  user-select: none;
-  transition: all 0.2s ease;
-}
-
-.checkbox-item input[type="radio"] {
-  display: none; /* Ẩn ô tròn mặc định */
-}
-
-/* Khung ô dấu tích tùy chỉnh */
-.custom-check {
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--text-muted);
-  border-radius: 4px;
-  display: inline-block;
-  position: relative;
-  transition: all 0.2s ease;
-}
-
-/* Khi ô được chọn (Active) */
-.checkbox-item.active {
-  border-color: #ffffff;
-  background: #222222;
-}
-
-.checkbox-item.active .custom-check {
-  background-color: #ffffff;
-  border-color: #ffffff;
-}
-
-/* Dấu tích v bên trong ô */
-.checkbox-item.active .custom-check::after {
-  content: "";
-  position: absolute;
-  left: 5px;
-  top: 1px;
-  width: 4px;
-  height: 9px;
-  border: solid #000000;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
-
-/* Nút Submit */
+/* Nút Submit & Thống kê */
 .btn-primary {
   width: 100%;
   background: #ffffff;
@@ -192,7 +111,6 @@ body {
   font-weight: bold;
   font-size: 14px;
   cursor: pointer;
-  margin-top: 4px;
 }
 
 .btn-secondary {
@@ -205,7 +123,6 @@ body {
   cursor: pointer;
 }
 
-/* Thống kê */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -217,18 +134,18 @@ body {
   background: #161616;
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 12px;
+  padding: 10px;
   text-align: center;
 }
 
 .stat-num {
   display: block;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
 }
 
 .stat-label {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-muted);
 }
 
@@ -240,7 +157,7 @@ body {
 }
 
 .list-header h2 {
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .table-wrapper {
@@ -250,11 +167,11 @@ body {
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 th, td {
-  padding: 10px 8px;
+  padding: 8px 6px;
   text-align: left;
   border-bottom: 1px solid var(--border-color);
 }
@@ -268,14 +185,6 @@ th {
   text-align: center;
   color: var(--text-muted);
 }
-
-.message {
-  margin-top: 10px;
-  font-size: 12px;
-  text-align: center;
-}
-
-@media (min-width: 640px) {
   .week-selector {
     grid-template-columns: repeat(7, 1fr);
   }
