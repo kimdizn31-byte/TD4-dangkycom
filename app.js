@@ -833,8 +833,9 @@ function openPage(page) {
   if (target) {
     target.classList.remove("hidden");
   }
-  if (page === "menu") {
+ if (page === "menu") {
   renderWeeklyMenu();
+  updateMenuAdminControls();
 }
 
   const activeBtn = document.querySelector(
@@ -851,6 +852,29 @@ document.querySelectorAll(".nav-btn").forEach((btn) => {
     openPage(btn.dataset.page);
   });
 });
+async function updateMenuAdminControls() {
+  if (!session?.user?.email) return;
+
+  const { data, error } = await supabaseClient
+    .from("members")
+    .select("is_admin")
+    .eq("email", session.user.email.toLowerCase())
+    .eq("active", true)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Lỗi kiểm tra admin:", error);
+    return;
+  }
+
+  const controls = document.getElementById("menuAdminControls");
+
+  if (data?.is_admin === true) {
+    controls?.classList.remove("hidden");
+  } else {
+    controls?.classList.add("hidden");
+  }
+}
 function renderWeeklyMenu() {
   const container = document.getElementById("weeklyMenuRows");
 
