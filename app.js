@@ -893,3 +893,42 @@ function renderWeeklyMenu() {
   document.getElementById("menuWeekLabel").textContent =
     `${shortDate(currentWeekStart)} - ${shortDate(weekEnd())}`;
 }
+async function saveWeeklyMenu() {
+  const inputs = document.querySelectorAll(".menu-input");
+  const rows = [];
+
+  inputs.forEach((input) => {
+    const dishName = input.value.trim();
+
+    if (!dishName) return;
+
+    rows.push({
+      meal_date: input.dataset.date,
+      meal: input.dataset.meal,
+      dish_name: dishName
+    });
+  });
+
+  if (rows.length === 0) {
+    alert("Bạn chưa nhập món ăn.");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("weekly_menu")
+    .upsert(rows, {
+      onConflict: "meal_date,meal"
+    });
+
+  if (error) {
+    console.error("Lỗi lưu thực đơn:", error);
+    alert("Không lưu được thực đơn.");
+    return;
+  }
+
+  alert("Đã lưu thực đơn ✅");
+}
+
+document
+  .getElementById("saveMenuBtn")
+  ?.addEventListener("click", saveWeeklyMenu);
