@@ -271,7 +271,123 @@ function renderWeekRows() {
 
   applyExistingSelections();
 }
+function renderEatingPeople() {
+  const container = document.getElementById("eatingPeopleList");
 
+  if (!container) return;
+
+  let html = `<h3>👥 Người ăn trong tuần</h3>`;
+
+  for (let i = 0; i < 7; i++) {
+    const date = addDays(currentWeekStart, i);
+    const dateStr = localDateString(date);
+
+    const morningPeople = weekRowsData.filter(
+      (row) =>
+        row.meal_date === dateStr &&
+        row.meal === "Trưa" &&
+        (row.status === "Đúng giờ" || row.status === "Ăn trễ")
+    );
+
+    const afternoonPeople = weekRowsData.filter(
+      (row) =>
+        row.meal_date === dateStr &&
+        row.meal === "Tối" &&
+        (row.status === "Đúng giờ" || row.status === "Ăn trễ")
+    );
+
+    html += `
+      <div class="eating-day-card">
+        <div class="eating-day-title">
+          <strong>${dayName(date)}</strong>
+          <span>${displayDate(date)}</span>
+        </div>
+
+        <div class="eating-meals">
+          <button
+            type="button"
+            class="eating-count-btn"
+            data-date="${dateStr}"
+            data-meal="Trưa"
+          >
+            🌤️ Sáng:
+            <strong>${morningPeople.length} người</strong>
+          </button>
+
+          <button
+            type="button"
+            class="eating-count-btn"
+            data-date="${dateStr}"
+            data-meal="Tối"
+          >
+            🌇 Chiều:
+            <strong>${afternoonPeople.length} người</strong>
+          </button>
+        </div>
+
+        <div
+          class="eating-names hidden"
+          id="eatingNames-${dateStr}"
+        ></div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+}
+function showEatingNames(date, meal) {
+  const box = document.getElementById(`eatingNames-${date}`);
+
+  if (!box) return;
+
+  const people = weekRowsData.filter(
+    (row) =>
+      row.meal_date === date &&
+      row.meal === meal &&
+      (row.status === "Đúng giờ" || row.status === "Ăn trễ")
+  );
+
+  const mealName =
+    meal === "Trưa" ? "🌤️ Sáng" : "🌇 Chiều";
+
+  if (people.length === 0) {
+    box.innerHTML = `
+      <strong>${mealName}</strong>
+      <p>Chưa có ai ăn.</p>
+    `;
+
+    box.classList.remove("hidden");
+    return;
+  }
+
+  box.innerHTML = `
+    <strong>${mealName}</strong>
+
+    ${people
+      .map(
+        (person, index) => `
+          <div class="eating-person">
+            ${index + 1}. ${escapeHtml(person.name || "Chưa có tên")}
+          </div>
+        `
+      )
+      .join("")}
+  `;
+
+  box.classList.remove("hidden");
+}
+document
+  .getElementById("eatingPeopleList")
+  ?.addEventListener("click", (event) => {
+    const button = event.target.closest(".eating-count-btn");
+
+    if (!button) return;
+
+    showEatingNames(
+      button.dataset.date,
+      button.dataset.meal
+    );
+  });
 function mealCell(date, meal) {
   const key =
     `${date}-${meal === "Trưa" ? "morning" : "afternoon"}`;
@@ -331,7 +447,7 @@ async function loadWeek() {
     );
 
   renderWeekRows();
-  renderSummary();
+  renderEatingPeople();
  
 
   $("notice").textContent =
@@ -508,114 +624,7 @@ if (existing) {
 // SUMMARY
 // ===============================
 
-function renderSummary() {
-  const select = $("summaryDate");
 
-  // Tạo danh sách 7 ngày của tuần
-  const currentValue = select.value;
-
-  select.innerHTML = "";
-
-  for (let i = 0; i < 7; i++) {
-    const date = addDays(currentWeekStart, i);
-    const dateStr = localDateString(date);
-
-    const option = document.createElement("option");
-    option.value = dateStr;
-    option.textContent =
-      `${dayName(date)} - ${displayDate(date)}`;
-
-    select.appendChild(option);
-  }
-
-  // Giữ ngày đang chọn nếu vẫn nằm trong tuần
-  const exists = [...select.options]
-    .some((option) => option.value === currentValue);
-
-  if (exists) {
-    select.value = currentValue;
-  } else if (
-    todayString() >= localDateString(currentWeekStart) &&
-    todayString() <= localDateString(weekEnd())
-  ) {
-    select.value = todayString();
-  }
-
-  updateDailySummary();
-}
-function updateDailySummary() {
-  const date = $("summaryDate").value;
-
-  const rows = weekRowsData.filter(
-    (row) => row.meal_date === date
-  );
-
-  const count = (meal, status) =>
-    rows.filter(
-      (row) =>
-        row.meal === meal &&
-        row.status === status
-    ).length;
-
-  $("morningOnTime").textContent =
-    count("Trưa", "Đúng giờ");
-
-  $("morningLate").textContent =
-    count("Trưa", "Ăn trễ");
-
-  $("morningNoEat").textContent =
-    count("Trưa", "Không ăn");
-
-  $("afternoonOnTime").textContent =
-    count("Tối", "Đúng giờ");
-
-  $("afternoonLate").textContent =
-    count("Tối", "Ăn trễ");
-
-  $("afternoonNoEat").textContent =
-    count("Tối", "Không ăn");
-
-  $("summaryPeopleList").innerHTML =
-    "<p>Bấm vào một mục để xem ai đã đăng ký.</p>";
-}
-function showSummaryPeople(meal, status) {
-  const date = $("summaryDate").value;
-
-  const people = weekRowsData.filter(
-    (row) =>
-      row.meal_date === date &&
-      row.meal === meal &&
-      row.status === status
-  );
-
-  const mealName =
-    meal === "Trưa" ? "🌤️ Sáng" : "🌇 Chiều";
-
-  if (people.length === 0) {
-    $("summaryPeopleList").innerHTML = `
-      <h3>${mealName} - ${status}</h3>
-      <p>Chưa có ai đăng ký.</p>
-    `;
-    return;
-  }
-
-  $("summaryPeopleList").innerHTML = `
-    <h3>${mealName} - ${status}</h3>
-
-    ${people
-      .map(
-        (person, index) => `
-          <div class="summary-person">
-            <strong>
-              ${index + 1}. ${escapeHtml(person.name)}
-            </strong>
-            <span>${escapeHtml(person.email)}</span>
-          </div>
-        `
-      )
-      .join("")}
-  `;
-}
 // ===============================
 // REGISTRATION LIST
 // ===============================
