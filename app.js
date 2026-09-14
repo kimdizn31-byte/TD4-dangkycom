@@ -779,6 +779,29 @@ async function checkMemberAccess(user) {
 
   return !!data;
 }
+async function updateAdminAccess() {
+  if (!session?.user?.email) return;
+
+  const { data, error } = await supabaseClient
+    .from("members")
+    .select("is_admin")
+    .eq("email", session.user.email.toLowerCase())
+    .eq("active", true)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Lỗi kiểm tra quyền admin:", error);
+    return;
+  }
+
+  const adminBtn = document.getElementById("adminNavBtn");
+
+  if (data?.is_admin === true) {
+    adminBtn?.classList.remove("hidden");
+  } else {
+    adminBtn?.classList.add("hidden");
+  }
+}
 async function handleSession(currentSession) {
   session = currentSession;
 
@@ -802,7 +825,8 @@ async function handleSession(currentSession) {
     return;
   }
 
-  await showApp();
+ await showApp();
+await updateAdminAccess();
 }
 
 
