@@ -1,38 +1,24 @@
-# Website đăng ký suất cơm online
+# Đăng ký cơm — Google Login
 
-## Công nghệ
-- HTML/CSS/JavaScript
-- Supabase PostgreSQL làm database
-- Có thể deploy frontend miễn phí trên Vercel hoặc Netlify
+## Chức năng
+- Bắt buộc đăng nhập Google trước khi đăng ký.
+- Mỗi tài khoản chỉ có 1 đăng ký cho mỗi ngày + buổi.
+- Lựa chọn: Đúng giờ / Ăn trễ / Không ăn.
+- Đăng ký mới cho hôm nay bị khóa từ 08:00.
+- Đã đăng ký chỉ được đổi Đúng giờ ↔ Ăn trễ:
+  - Trưa: chỉ được đổi trước 10:30.
+  - Tối: chỉ được đổi trước 17:30.
+- Quy tắc thời gian được kiểm tra cả ở database, không chỉ ở giao diện.
+- Giao diện tối, tối ưu điện thoại.
+- Tổng kết: tổng đăng ký, đúng giờ, ăn trễ, không ăn, trưa, tối.
 
-## 1. Tạo database
-1. Tạo tài khoản Supabase.
-2. Tạo một project Free.
-3. Mở SQL Editor.
-4. Dán toàn bộ nội dung `supabase.sql` và Run.
-5. Vào Project Settings > API.
-6. Lấy Project URL và Publishable/anon key.
+## Cài đặt
+1. Chạy toàn bộ `supabase.sql` trong Supabase SQL Editor.
+2. Bật Google Provider trong Supabase Authentication.
+3. Cấu hình Google OAuth Client ID/Secret theo tài liệu Supabase.
+4. Trong `app.js`, thay `YOUR_SUPABASE_URL` và `YOUR_SUPABASE_PUBLISHABLE_KEY`.
+5. Đưa 5 file lên GitHub và deploy bằng Vercel.
+6. Sau khi có domain Vercel, thêm domain vào Site URL / Redirect URLs của Supabase và Authorized JavaScript origins của Google.
 
-## 2. Kết nối website
-Mở `app.js`:
-- thay `YOUR_SUPABASE_URL`
-- thay `YOUR_SUPABASE_ANON_KEY`
-
-Không đưa Service Role Key vào website.
-
-## 3. Chạy thử
-Mở `index.html` bằng trình duyệt sau khi đã cấu hình.
-
-## 4. Đưa lên mạng
-Cách dễ nhất:
-- Đăng code lên GitHub.
-- Import repository vào Vercel.
-- Không cần build command cho bộ HTML này.
-- Deploy.
-- Vercel sẽ cấp một URL dạng `*.vercel.app`.
-
-Hoặc dùng Netlify Drop để kéo thả thư mục website.
-
-## 5. Lưu ý bảo mật
-Bản demo cho phép mọi người xem và thêm đăng ký. Không cho phép khách xóa dữ liệu.
-Nếu muốn trang quản trị riêng để sửa/xóa và xuất Excel, cần thêm Admin Auth + RLS policy.
+## Giả định
+"Khóa lúc 08:00" được hiểu là khóa đăng ký mới cho suất của ngày hiện tại; đăng ký ngày tương lai vẫn được phép. Nếu bạn muốn 08:00 khóa toàn bộ ngày tương lai hoặc muốn khung đổi trạng thái chỉ đúng 1 phút, sửa quy tắc trong `supabase.sql`.

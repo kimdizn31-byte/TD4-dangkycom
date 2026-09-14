@@ -1,157 +1,106 @@
-const SUPABASE_URL = "https://usgecirqtmoldcvvwcxk.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable__qbft3pHINGK3sweQHL7W_DLC5z";
+const SUPABASE_URL = "YOUR_SUPABASE_URL";
+const SUPABASE_PUBLISHABLE_KEY = "YOUR_SUPABASE_PUBLISHABLE_KEY";
 
-const sb = (typeof supabase !== "undefined") ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+const $ = id => document.getElementById(id);
+let session = null, selectedMeal = "Trưa", selectedStatus = "Đúng giờ", rows = [];
 
-document.addEventListener("DOMContentLoaded", () => {
-  initGoogleAuth();
-  listenAuthChanges();
-});
+function localDate(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Ho_Chi_Minh"}).format(new Date())}
+function nowVN(){return new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Ho_Chi_Minh"}))}
+function minutesNow(){const d=nowVN();return d.getHours()*60+d.getMinutes()}
+function timeText(){const d=nowVN();return d.toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit",second:"2-digit"})+" • "+d.toLocaleDateString("vi-VN")}
+function statusWindow(meal){return meal==="Trưa"?"trước 10:30":"trước 17:30"}
+function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 
-function initGoogleAuth() {
-  document.getElementById("btn-google-login")?.addEventListener("click", async () => {
-    if (!sb) return alert("Chưa kết nối Supabase!");
-    const { error } = await sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: "https://td-4-dangkycom.vercel.app"
-      }
-    });
-    if (error) alert("Lỗi Google Auth: " + error.message);
-  });
+function showApp(){
+  $("loginView").classList.add("hidden");$("appView").classList.remove("hidden");$("userBox").classList.remove("hidden");
+  $("userEmail").textContent=session.user.email||"Đã đăng nhập";
+  $("mealDate").value=localDate();$("filterDate").value=localDate();
+  updateClock();setInterval(updateClock,1000);updateNotice();loadRows();
+}
+function updateClock(){$("clockBox").innerHTML=`${timeText()}<small>Giờ Việt Nam</small>`;$("todayLabel").textContent=localDate();$("summaryDate").textContent=$("filterDate").value}
+function updateNotice(){
+  const date=$("mealDate").value||localDate();
+  let t=date===localDate()?"Đăng ký mới hôm nay chỉ được thực hiện trước 08:00.":"Bạn đang chọn ngày khác.";
+  t+=` Đổi Đúng giờ/Ăn trễ: Trưa ${statusWindow("Trưa")}; Tối ${statusWindow("Tối")}.`;
+  $("notice").textContent=t;
+}
+async function login(){
+  $("loginError").textContent="";
+  const {error}=await supabase.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin+location.pathname}});
+  if(error)$("loginError").textContent=error.message;
+}
+async function logout(){await supabase.auth.signOut();location.reload()}
+
+async function loadRows(){
+  const date=$("filterDate").value||localDate(),meal=$("filterMeal").value;
+  let q=supabase.from("meal_registrations").select("*").eq("meal_date",date).order("created_at",{ascending:true});
+  if(meal)q=q.eq("meal",meal);
+  const {data,error}=await q;
+  if(error){$("registrationTable").innerHTML=`<tr><td colspan="6" class="empty">${escapeHtml(error.message)}</td></tr>`;return}
+  rows=data||[];renderRows();renderStats();
+}
+function renderRows(){
+  if(!rows.length){$("registrationTable").innerHTML='<tr><td colspan="6" class="empty">Chưa có đăng ký</td></tr>';return}
+  $("registrationTable").innerHTML=rows.map(r=>`<tr>
+    <td><strong>${escapeHtml(r.name)}</strong></td><td>${escapeHtml(r.email)}</td>
+    <td>${escapeHtml(r.meal_date)}</td><td>${r.meal==="Trưa"?"☀️":"🌙"} ${escapeHtml(r.meal)}</td>
+    <td><span class="badge">${escapeHtml(r.status)}</span></td>
+    <td>${new Date(r.created_at).toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"})}</td>
+  </tr>`).join("");
+}
+function renderStats(){
+  $("totalCount").textContent=rows.length;
+  $("onTimeCount").textContent=rows.filter(x=>x.status==="Đúng giờ").length;
+  $("lateCount").textContent=rows.filter(x=>x.status==="Ăn trễ").length;
+  $("noEatCount").textContent=rows.filter(x=>x.status==="Không ăn").length;
+  $("lunchCount").textContent=rows.filter(x=>x.meal==="Trưa").length;
+  $("dinnerCount").textContent=rows.filter(x=>x.meal==="Tối").length;
+  $("summaryDate").textContent=$("filterDate").value;
 }
 
-function listenAuthChanges() {
-  if (!sb) return;
-  
-  sb.auth.onAuthStateChange((event, session) => {
-    if (session?.user) {
-      document.getElementById("btn-google-login").style.display = "none";
-      alert("Đăng nhập thành công: " + session.user.email);
+async function registerOrUpdate(){
+  $("formMessage").textContent="";
+  const date=$("mealDate").value;
+  if(!date){$("formMessage").textContent="Hãy chọn ngày ăn.";return}
+  if(date<localDate()){$("formMessage").textContent="Không thể đăng ký ngày đã qua.";return}
+
+  const {data:existing,error:findError}=await supabase.from("meal_registrations")
+    .select("id,status").eq("user_id",session.user.id).eq("meal_date",date).eq("meal",selectedMeal).maybeSingle();
+  if(findError){$("formMessage").textContent=findError.message;return}
+
+  if(existing){
+    if(selectedStatus==="Không ăn"){$("formMessage").textContent="Đã đăng ký rồi thì không thể đổi sang 'Không ăn'.";return}
+    const currentMinutes = minutesNow();
+    const deadline = selectedMeal==="Trưa" ? 10*60+30 : 17*60+30;
+    if(date===localDate() && currentMinutes >= deadline){
+      $("formMessage").textContent=`Đã quá giờ đổi trạng thái (${selectedMeal==="Trưa"?"10:30":"17:30"}).`;
+      return;
     }
-  });
-}
-
-function initGoogleAuth() {
-  const mealForm = document.getElementById("mealForm");
-  if (!mealForm) return;
-
-  if (!document.getElementById("auth-container")) {
-    const authHTML = `
-      <div id="auth-container" style="margin-bottom: 15px;">
-        <button id="btn-google-login" type="button" style="background-color: #ffffff; color: #000000; border: none; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; font-size: 14px;">
-          🔑 Đăng nhập bằng Gmail
-        </button>
-        <div id="user-profile" style="display: none; background: #161616; border: 1px solid #222; padding: 10px 14px; border-radius: 8px; justify-content: space-between; align-items: center;">
-          <div>
-            <div id="user-display-name" style="font-weight: bold; color: #ffffff; font-size: 13px;"></div>
-            <div id="user-display-email" style="font-size: 11px; color: #888888;"></div>
-          </div>
-          <button id="btn-logout" type="button" style="background: transparent; border: 1px solid #333; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; color: #ccc;">
-            Đăng xuất
-          </button>
-        </div>
-      </div>
-    `;
-    mealForm.insertAdjacentHTML("afterbegin", authHTML);
+    const {error}=await supabase.from("meal_registrations").update({status:selectedStatus}).eq("id",existing.id);
+    $("formMessage").textContent=error?error.message:"Đã cập nhật trạng thái.";
+    loadRows();return;
   }
 
-  document.getElementById("btn-google-login")?.addEventListener("click", async () => {
-    if (!sb) return alert("Không kết nối được CSDL!");
-    const { error } = await sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin }
-    });
-    if (error) alert("Lỗi đăng nhập: " + error.message);
+  const name=session.user.user_metadata?.full_name||session.user.user_metadata?.name||session.user.email?.split("@")[0]||"Người dùng";
+  const {error}=await supabase.from("meal_registrations").insert({
+    user_id:session.user.id,email:session.user.email,name,meal_date:date,meal:selectedMeal,status:selectedStatus
   });
-
-  document.getElementById("btn-logout")?.addEventListener("click", async () => {
-    if (sb) {
-      await sb.auth.signOut();
-      window.location.reload();
-    }
-  });
+  $("formMessage").textContent=error?error.message:"Đăng ký thành công!";
+  if(!error){$("filterDate").value=date;loadRows()}
 }
+function selectMeal(btn){selectedMeal=btn.dataset.meal;document.querySelectorAll(".choice").forEach(x=>x.classList.toggle("active",x===btn));updateNotice()}
+function selectStatus(btn){selectedStatus=btn.dataset.status;document.querySelectorAll(".status-choice").forEach(x=>x.classList.toggle("active",x===btn))}
 
-function generateWeekDays() {
-  const container = document.getElementById("weekDaysContainer");
-  if (!container) return;
+$("googleLoginBtn").addEventListener("click",login);
+$("logoutBtn").addEventListener("click",logout);
+document.querySelectorAll(".choice").forEach(b=>b.addEventListener("click",()=>selectMeal(b)));
+document.querySelectorAll(".status-choice").forEach(b=>b.addEventListener("click",()=>selectStatus(b)));
+$("registerBtn").addEventListener("click",registerOrUpdate);
+$("refreshBtn").addEventListener("click",loadRows);
+$("filterDate").addEventListener("change",()=>{updateClock();loadRows()});
+$("filterMeal").addEventListener("change",loadRows);
+$("mealDate").addEventListener("change",updateNotice);
 
-  const days = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"];
-  const now = new Date();
-  const currentDay = now.getDay();
-  const diff = now.getDate() - currentDay + (currentDay === 0 ? -6 : 1);
-  const monday = new Date(now.setDate(diff));
-
-  let html = "";
-  days.forEach((dayName, index) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + index);
-    const dateStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
-    const isoDate = d.toISOString().split('T')[0];
-
-    html += `
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #222; font-size: 13px;">
-        <div style="width: 30%;">
-          <strong>${dayName}</strong><br><small style="color: #777;">${dateStr}</small>
-        </div>
-        <div style="width: 33%;">
-          <select data-date="${isoDate}" data-meal="lunch" style="width: 95%; background: #111; color: #fff; border: 1px solid #333; padding: 6px; border-radius: 4px;">
-            <option value="Không ăn">❌ Không ăn</option>
-            <option value="Đúng giờ">⏰ Đúng giờ</option>
-            <option value="Ăn muộn">⏳ Ăn muộn</option>
-          </select>
-        </div>
-        <div style="width: 33%;">
-          <select data-date="${isoDate}" data-meal="dinner" style="width: 95%; background: #111; color: #fff; border: 1px solid #333; padding: 6px; border-radius: 4px;">
-            <option value="Không ăn">❌ Không ăn</option>
-            <option value="Đúng giờ">⏰ Đúng giờ</option>
-            <option value="Ăn muộn">⏳ Ăn muộn</option>
-          </select>
-        </div>
-      </div>
-    `;
-  });
-  container.innerHTML = html;
-}
-
-function listenAuthChanges() {
-  if (!sb) return;
-
-  sb.auth.onAuthStateChange((event, session) => {
-    if (session && session.user) {
-      updateUIForLoggedInUser(session.user);
-    } else {
-      updateUIForLoggedOutUser();
-    }
-  });
-
-  sb.auth.getSession().then(({ data: { session } }) => {
-    if (session && session.user) {
-      updateUIForLoggedInUser(session.user);
-    } else {
-      updateUIForLoggedOutUser();
-    }
-  });
-}
-
-function updateUIForLoggedInUser(user) {
-  const loginBtn = document.getElementById("btn-google-login");
-  const userProfile = document.getElementById("user-profile");
-  const displayName = document.getElementById("user-display-name");
-  const displayEmail = document.getElementById("user-display-email");
-
-  if (loginBtn) loginBtn.style.display = "none";
-  if (userProfile) userProfile.style.display = "flex";
-
-  if (displayName) displayName.textContent = user.user_metadata?.full_name || user.email;
-  if (displayEmail) displayEmail.textContent = user.email || "";
-}
-
-function updateUIForLoggedOutUser() {
-  const loginBtn = document.getElementById("btn-google-login");
-  const userProfile = document.getElementById("user-profile");
-
-  if (loginBtn) loginBtn.style.display = "block";
-  if (userProfile) userProfile.style.display = "none";
-}
+supabase.auth.getSession().then(({data})=>{session=data.session;if(session)showApp()});
+supabase.auth.onAuthStateChange((_event,newSession)=>{session=newSession;if(session)showApp()});

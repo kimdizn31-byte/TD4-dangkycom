@@ -1,58 +1,93 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Đăng Ký Cơm Theo Tuần</title>
+  <title>Đăng ký cơm</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <div class="container" style="max-width: 600px; margin: 20px auto; padding: 15px; background: #000; color: #fff; font-family: sans-serif;">
-    <h1 style="text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px;">ĐĂNG KÝ CƠM THEO TUẦN</h1>
+<header class="topbar">
+  <div class="brand"><span>🍚</span><div><strong>Đăng ký cơm</strong><small>Quản lý suất ăn mỗi ngày</small></div></div>
+  <div id="userBox" class="user-box hidden"><span id="userEmail"></span><button id="logoutBtn" class="ghost-btn">Đăng xuất</button></div>
+</header>
 
-    <form id="mealForm" style="background: #111; padding: 15px; border-radius: 8px; border: 1px solid #222;">
-      <div class="table-header" style="display: flex; justify-content: space-between; padding: 8px 0; font-weight: bold; border-bottom: 1px solid #333; font-size: 13px; text-align: center;">
-        <div style="width: 30%;">Thứ / Ngày</div>
-        <div style="width: 33%;">☀️ Buổi Trưa</div>
-        <div style="width: 33%;">🌙 Buổi Tối</div>
+<main class="container">
+  <section id="loginView" class="login-card">
+    <div class="login-icon">🍚</div>
+    <h1>Đăng ký cơm</h1>
+    <p>Đăng nhập bằng Google để đăng ký và quản lý suất cơm của bạn.</p>
+    <button id="googleLoginBtn" class="google-btn"><span>G</span> Đăng nhập bằng Google</button>
+    <p id="loginError" class="error"></p>
+  </section>
+
+  <section id="appView" class="hidden">
+    <div class="hero">
+      <div>
+        <h1>Hôm nay ăn cơm thế nào?</h1>
+        <p>Đăng ký mới trước 08:00. Sau đó chỉ người đã đăng ký mới được đổi Đúng giờ / Ăn trễ trong khung quy định.</p>
       </div>
-
-      <!-- KHU VỰC HIỂN THỊ CÁC NGÀY TRONG TUẦN -->
-      <div id="weekDaysContainer"></div>
-
-      <button type="submit" id="btn-save" style="margin-top: 15px; width: 100%; padding: 12px; background: #ffffff; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
-        💾 Lưu đăng ký tuần này
-      </button>
-    </form>
-
-    <div style="margin-top: 25px; background: #111; padding: 15px; border-radius: 8px; border: 1px solid #222;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h3 style="margin: 0; font-size: 15px;">Danh sách đã đăng ký</h3>
-        <button id="btn-refresh" type="button" style="background: #222; color: #fff; border: 1px solid #333; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">🔄 Làm mới</button>
-      </div>
-
-      <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-        <div style="flex: 1; background: #181818; padding: 8px; border-radius: 6px; text-align: center;">
-          <strong id="stat-total" style="font-size: 16px;">0</strong>
-          <div style="font-size: 10px; color: #777;">Tổng suất</div>
-        </div>
-        <div style="flex: 1; background: #181818; padding: 8px; border-radius: 6px; text-align: center;">
-          <strong id="stat-lunch" style="font-size: 16px;">0</strong>
-          <div style="font-size: 10px; color: #777;">Trưa</div>
-        </div>
-        <div style="flex: 1; background: #181818; padding: 8px; border-radius: 6px; text-align: center;">
-          <strong id="stat-dinner" style="font-size: 16px;">0</strong>
-          <div style="font-size: 10px; color: #777;">Tối</div>
-        </div>
-      </div>
-
-      <div id="registrations-list" style="font-size: 12px; color: #ccc;">
-        Chưa có dữ liệu
-      </div>
+      <div id="clockBox" class="clock-box"></div>
     </div>
-  </div>
 
-  <script src="app.js"></script>
+    <div id="notice" class="notice"></div>
+
+    <div class="grid">
+      <section class="card">
+        <div class="card-title"><h2>Đăng ký / cập nhật</h2><span id="todayLabel"></span></div>
+
+        <label>Ngày ăn</label>
+        <input id="mealDate" type="date">
+
+        <label>Buổi ăn</label>
+        <div class="choice-grid">
+          <button class="choice active" data-meal="Trưa">☀️ Trưa</button>
+          <button class="choice" data-meal="Tối">🌙 Tối</button>
+        </div>
+
+        <label>Trạng thái</label>
+        <div class="status-grid">
+          <button class="status-choice active" data-status="Đúng giờ">⏰ Đúng giờ</button>
+          <button class="status-choice" data-status="Ăn trễ">🕐 Ăn trễ</button>
+          <button class="status-choice" data-status="Không ăn">✕ Không ăn</button>
+        </div>
+
+        <button id="registerBtn" class="primary-btn">+ Đăng ký</button>
+        <p id="formMessage" class="message"></p>
+      </section>
+
+      <section class="card">
+        <div class="card-title"><h2>Tổng kết</h2><span id="summaryDate"></span></div>
+        <div class="stats">
+          <div class="stat"><strong id="totalCount">0</strong><span>Tổng đăng ký</span></div>
+          <div class="stat"><strong id="onTimeCount">0</strong><span>Đúng giờ</span></div>
+          <div class="stat"><strong id="lateCount">0</strong><span>Ăn trễ</span></div>
+          <div class="stat"><strong id="noEatCount">0</strong><span>Không ăn</span></div>
+        </div>
+        <div class="meal-summary">
+          <div><span>☀️ Trưa</span><strong id="lunchCount">0</strong></div>
+          <div><span>🌙 Tối</span><strong id="dinnerCount">0</strong></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="card">
+      <div class="card-title"><h2>Danh sách đăng ký</h2><button id="refreshBtn" class="ghost-btn">↻ Làm mới</button></div>
+      <div class="filters">
+        <input id="filterDate" type="date">
+        <select id="filterMeal"><option value="">Tất cả buổi</option><option value="Trưa">Trưa</option><option value="Tối">Tối</option></select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tên</th><th>Email</th><th>Ngày</th><th>Buổi</th><th>Trạng thái</th><th>Thời gian đăng ký</th></tr></thead>
+          <tbody id="registrationTable"><tr><td colspan="6" class="empty">Chưa có dữ liệu</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
 </body>
 </html>
