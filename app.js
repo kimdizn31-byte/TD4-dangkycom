@@ -838,6 +838,7 @@ function openPage(page) {
   renderWeeklyMenu();
   loadWeeklyMenu();
   updateMenuAdminControls();
+   loadMenuPool();
 }
   const activeBtn = document.querySelector(
     `.nav-btn[data-page="${page}"]`
@@ -918,6 +919,64 @@ function renderWeeklyMenu() {
   document.getElementById("menuWeekLabel").textContent =
     `${shortDate(menuWeekStart)} - ${shortDate(addDays(menuWeekStart, 6))}`;
 }
+async function loadMenuPool() {
+  const { data, error } = await supabaseClient
+    .from("menu_pool")
+    .select("dish_name")
+    .eq("active", true)
+    .order("id");
+
+  if (error) {
+    console.error("Lỗi tải kho món:", error);
+    return;
+  }
+
+  const input = document.getElementById("menuPoolInput");
+
+  if (input) {
+    input.value = data
+      .map((row) => row.dish_name)
+      .join("\n");
+  }
+}
+
+async function saveMenuPool() {
+  const input = document.getElementById("menuPoolInput");
+
+  const dishes = input.value
+    .split("\n")
+    .map((dish) => dish.trim())
+    .filter((dish) => dish !== "");
+
+  if (dishes.length === 0) {
+    alert("Bạn chưa nhập món.");
+    return;
+  }
+
+  const rows = dishes.map((dish) => ({
+    dish_name: dish,
+    active: true
+  }));
+
+  const { error } = await supabaseClient
+    .from("menu_pool")
+    .upsert(rows, {
+      onConflict: "dish_name"
+    });
+
+  if (error) {
+    console.error("Lỗi lưu kho món:", error);
+    alert("Không lưu được kho món.");
+    return;
+  }
+
+  alert("Đã lưu kho món ✅");
+  await loadMenuPool();
+}
+
+document
+  .getElementById("saveMenuPoolBtn")
+  ?.addEventListener("click", saveMenuPool);
 async function randomWeeklyMenu() {
   const { data, error } = await supabaseClient
     .from("menu_pool")
