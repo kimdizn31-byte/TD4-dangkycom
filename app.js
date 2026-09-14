@@ -774,50 +774,42 @@ async function checkMemberAccess(user) {
 
   return !!data;
 }
+async function handleSession(currentSession) {
+  session = currentSession;
+
+  if (!session) {
+    $("appView").classList.add("hidden");
+    $("userBox").classList.add("hidden");
+    $("loginView").classList.remove("hidden");
+    return;
+  }
+
+  const allowed = await checkMemberAccess(session.user);
+
+  if (!allowed) {
+    await supabaseClient.auth.signOut();
+
+    $("appView").classList.add("hidden");
+    $("userBox").classList.add("hidden");
+    $("loginView").classList.remove("hidden");
+
+    alert("Tài khoản này không thuộc danh sách thành viên.");
+    return;
+  }
+
+  await showApp();
+}
+
+
 supabaseClient.auth
   .getSession()
   .then(({ data }) => {
-    session = data.session;
-
-    if (session) {
-      checkMemberAccess(session.user).then(async (allowed) => {
-        if (allowed) {
-          showApp();
-        } else {
-          await supabaseClient.auth.signOut();
-
-          $("appView").classList.add("hidden");
-          $("userBox").classList.add("hidden");
-          $("loginView").classList.remove("hidden");
-
-          alert("Tài khoản này không thuộc danh sách thành viên.");
-        }
-      });
-    }
+    handleSession(data.session);
   });
+
 
 supabaseClient.auth.onAuthStateChange(
   (event, newSession) => {
-    session = newSession;
-
-    if (session) {
-      checkMemberAccess(session.user).then(async (allowed) => {
-        if (allowed) {
-          showApp();
-        } else {
-          await supabaseClient.auth.signOut();
-
-          $("appView").classList.add("hidden");
-          $("userBox").classList.add("hidden");
-          $("loginView").classList.remove("hidden");
-
-          alert("Tài khoản này không thuộc danh sách thành viên.");
-        }
-      });
-    } else {
-      $("appView").classList.add("hidden");
-      $("userBox").classList.add("hidden");
-      $("loginView").classList.remove("hidden");
-    }
+    handleSession(newSession);
   }
 );
