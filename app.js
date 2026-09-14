@@ -10,6 +10,7 @@ const $ = (id) => document.getElementById(id);
 
 let session = null;
 let currentWeekStart = getMonday(new Date());
+let menuWeekStart = new Date(currentWeekStart);
 let weekRowsData = [];
 let myRegistrations = [];
 
@@ -835,9 +836,9 @@ function openPage(page) {
   }
  if (page === "menu") {
   renderWeeklyMenu();
+  loadWeeklyMenu();
   updateMenuAdminControls();
 }
-
   const activeBtn = document.querySelector(
     `.nav-btn[data-page="${page}"]`
   );
@@ -883,7 +884,7 @@ function renderWeeklyMenu() {
   container.innerHTML = "";
 
   for (let i = 0; i < 7; i++) {
-    const date = addDays(currentWeekStart, i);
+   const date = addDays(menuWeekStart, i);
     const dateStr = localDateString(date);
 
     container.innerHTML += `
@@ -915,7 +916,7 @@ function renderWeeklyMenu() {
   }
 
   document.getElementById("menuWeekLabel").textContent =
-    `${shortDate(currentWeekStart)} - ${shortDate(weekEnd())}`;
+    `${shortDate(menuWeekStart)} - ${shortDate(addDays(menuWeekStart, 6))}`;
 }
 async function saveWeeklyMenu() {
   const inputs = document.querySelectorAll(".menu-input");
@@ -956,8 +957,33 @@ async function saveWeeklyMenu() {
 document
   .getElementById("saveMenuBtn")
   ?.addEventListener("click", saveWeeklyMenu);
+async function loadWeeklyMenu() {
+  const startDate = localDateString(menuWeekStart);
+  const endDate = localDateString(addDays(menuWeekStart, 6));
+
+  const { data, error } = await supabaseClient
+    .from("weekly_menu")
+    .select("meal_date, meal, dish_name")
+    .gte("meal_date", startDate)
+    .lte("meal_date", endDate);
+
+  if (error) {
+    console.error("Lỗi tải thực đơn:", error);
+    return;
+  }
+
+  data.forEach((row) => {
+    const input = document.querySelector(
+      `.menu-input[data-date="${row.meal_date}"][data-meal="${row.meal}"]`
+    );
+
+    if (input) {
+      input.value = row.dish_name;
+    }
+  });
+}
 async function changeMenuWeek(days) {
-  currentWeekStart = addDays(currentWeekStart, days);
+menuWeekStart = addDays(menuWeekStart, days);
 
   renderWeeklyMenu();
   await loadWeeklyMenu();
