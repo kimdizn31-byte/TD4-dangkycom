@@ -780,16 +780,20 @@ supabaseClient.auth
     session = data.session;
 
  if (session) {
-  checkMemberAccess(session.user).then((allowed) => {
+  checkMemberAccess(session.user).then(async (allowed) => {
     if (allowed) {
       showApp();
     } else {
+      await supabaseClient.auth.signOut();
+
+      $("appView").classList.add("hidden");
+      $("userBox").classList.add("hidden");
+      $("loginView").classList.remove("hidden");
+
       alert("Tài khoản này không thuộc danh sách thành viên.");
-      supabaseClient.auth.signOut();
     }
   });
 }
-
 supabaseClient.auth
   .onAuthStateChange(
     (_event, newSession) => {
