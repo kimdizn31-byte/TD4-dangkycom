@@ -699,3 +699,20 @@ th{
     font-size: 14px;
   }
 }
+/* ===== MENU CHỈ XEM CHO THÀNH VIÊN ===== */
+
+.menu-input[readonly] {
+  background: #1b1b1b;
+  color: #fff;
+  border: 1px solid #333;
+  cursor: default;
+}
+
+.menu-input[readonly]:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.menu-input[readonly]::placeholder {
+  color: #777;
+}
