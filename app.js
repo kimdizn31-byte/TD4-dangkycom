@@ -779,6 +779,27 @@ async function checkMemberAccess(user) {
 
   return !!data;
 }
+async function updateMemberNameFromGoogle(user) {
+  const email = user?.email;
+
+  const fullName =
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    "";
+
+  if (!email || !fullName) return;
+
+  const { error } = await supabaseClient
+    .from("members")
+    .update({
+      name: fullName
+    })
+    .eq("email", email.toLowerCase());
+
+  if (error) {
+    console.error("Lỗi cập nhật tên thành viên:", error);
+  }
+}
 async function updateAdminAccess() {
   if (!session?.user?.email) return;
 
@@ -925,6 +946,7 @@ async function handleSession(currentSession) {
   }
 
   const allowed = await checkMemberAccess(session.user);
+  await updateMemberNameFromGoogle(session.user);
 
   if (!allowed) {
     await supabaseClient.auth.signOut();
