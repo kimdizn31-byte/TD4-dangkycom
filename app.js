@@ -861,6 +861,14 @@ async function loadMembers() {
       >
         ${member.active ? "🟢 Đang hoạt động" : "⚫ Đã tắt"}
       </button>
+      <button
+  class="delete-member-btn"
+  data-id="${member.id}"
+  data-email="${escapeHtml(member.email)}"
+  ${member.is_admin ? "disabled" : ""}
+>
+  🗑️ Xóa
+</button>
     </div>
   `).join("");
 }
@@ -892,6 +900,40 @@ async function loadMembers() {
       button.dataset.active === "true";
 
     await toggleMember(memberId, currentActive);
+  });
+async function deleteMember(memberId, email) {
+  const ok = confirm(
+    `Bạn có chắc muốn xóa ${email} khỏi danh sách thành viên không?`
+  );
+
+  if (!ok) return;
+
+  const { error } = await supabaseClient
+    .from("members")
+    .delete()
+    .eq("id", memberId);
+
+  if (error) {
+    console.error("Lỗi xóa thành viên:", error);
+    alert("Không xóa được thành viên.");
+    return;
+  }
+
+  await loadMembers();
+  alert("Đã xóa thành viên ✅");
+}
+
+document
+  .getElementById("membersList")
+  ?.addEventListener("click", async (event) => {
+    const button = event.target.closest(".delete-member-btn");
+
+    if (!button || button.disabled) return;
+
+    const memberId = Number(button.dataset.id);
+    const email = button.dataset.email;
+
+    await deleteMember(memberId, email);
   });
 
 async function addMember() {
