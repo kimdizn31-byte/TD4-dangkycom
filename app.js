@@ -1180,7 +1180,9 @@ async function randomWeeklyMenu() {
 
   alert("Đã Random và lưu thực đơn tuần ✅");
 }
-
+document
+  .getElementById("randomMenuBtn")
+  ?.addEventListener("click", randomWeeklyMenu);
 
 async function loadWeeklyMenu() {
   const startDate = localDateString(menuWeekStart);
