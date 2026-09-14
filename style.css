@@ -565,3 +565,68 @@ th{
     font-size: 12px;
   }
 }
+/* ===== THỰC ĐƠN TUẦN ===== */
+
+#menuPage .card {
+  padding: 24px;
+}
+
+.menu-table {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.menu-row {
+  display: grid;
+  grid-template-columns: 180px 1fr 1fr;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.menu-header {
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.menu-date {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 15px;
+}
+
+.menu-input {
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  border: 1px solid #444;
+  font-size: 16px;
+}
+
+/* Điện thoại */
+@media (max-width: 600px) {
+  #menuPage .card {
+    padding: 14px;
+  }
+
+  .menu-row {
+    grid-template-columns: 90px 1fr 1fr;
+    gap: 7px;
+    padding: 12px 0;
+  }
+
+  .menu-date {
+    font-size: 13px;
+  }
+
+  .menu-input {
+    min-height: 48px;
+    padding: 9px 7px;
+    font-size: 14px;
+  }
+}
