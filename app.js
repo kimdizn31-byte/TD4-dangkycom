@@ -780,6 +780,45 @@ async function checkMemberAccess(user) {
   return !!data;
 }
 async function updateAdminAccess() {
+  async function loadMembers() {
+  const container = document.getElementById("membersList");
+  if (!container) return;
+
+  container.innerHTML = "<p>Đang tải danh sách...</p>";
+
+  const { data, error } = await supabaseClient
+    .from("members")
+    .select("id, email, name, is_admin, active")
+    .order("id", { ascending: true });
+
+  if (error) {
+    console.error("Lỗi tải thành viên:", error);
+    container.innerHTML = "<p>Không tải được danh sách.</p>";
+    return;
+  }
+
+  container.innerHTML = data.map((member) => `
+    <div class="member-row">
+      <div>
+        <strong>
+          ${escapeHtml(member.name || "Chưa có tên")}
+          ${member.is_admin ? " 👑" : ""}
+        </strong>
+
+        <div>${escapeHtml(member.email)}</div>
+      </div>
+
+      <button
+        class="toggle-member-btn"
+        data-id="${member.id}"
+        data-active="${member.active}"
+        ${member.is_admin ? "disabled" : ""}
+      >
+        ${member.active ? "🟢 Đang hoạt động" : "⚫ Đã tắt"}
+      </button>
+    </div>
+  `).join("");
+}
   if (!session?.user?.email) return;
 
   const { data, error } = await supabaseClient
@@ -990,6 +1029,9 @@ function openPage(page) {
 }
  if (page === "summary") {
   loadWeeklySummaryData();
+}
+  if (page === "members") {
+  loadMembers();
 }
   const activeBtn = document.querySelector(
     `.nav-btn[data-page="${page}"]`
