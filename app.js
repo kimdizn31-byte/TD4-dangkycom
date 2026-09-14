@@ -820,7 +820,7 @@ async function loadMembers() {
     container.innerHTML = "<p>Không tải được danh sách.</p>";
     return;
   }
-
+ 
   container.innerHTML = data.map((member) => `
     <div class="member-row">
       <div>
@@ -843,6 +843,36 @@ async function loadMembers() {
     </div>
   `).join("");
 }
+ async function toggleMember(memberId, currentActive) {
+  const { error } = await supabaseClient
+    .from("members")
+    .update({
+      active: !currentActive
+    })
+    .eq("id", memberId);
+
+  if (error) {
+    console.error("Lỗi đổi trạng thái thành viên:", error);
+    alert("Không đổi được trạng thái thành viên.");
+    return;
+  }
+
+  await loadMembers();
+}
+  document
+  .getElementById("membersList")
+  ?.addEventListener("click", async (event) => {
+    const button = event.target.closest(".toggle-member-btn");
+
+    if (!button || button.disabled) return;
+
+    const memberId = Number(button.dataset.id);
+    const currentActive =
+      button.dataset.active === "true";
+
+    await toggleMember(memberId, currentActive);
+  });
+
 async function addMember() {
   const input = document.getElementById("newMemberEmail");
   const email = input?.value.trim().toLowerCase();
