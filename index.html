@@ -142,52 +142,80 @@
 
 
     <!-- TỔNG KẾT -->
-    <div class="summary-date-select">
-  <label for="summaryDate">Chọn ngày</label>
+  <!-- ===== THỐNG KÊ THEO NGÀY ===== -->
 
-  <select id="summaryDate">
-  </select>
-</div>
+<section class="card daily-stats-card">
 
-<div class="daily-summary">
-   <div class="meal-summary-box">
-  <h3>🌤️ Sáng</h3>
+  <div class="daily-date-box">
+    <label for="dailyStatsDate">
+      📅 Chọn ngày
+    </label>
 
-  <button class="summary-item" data-meal="Trưa" data-status="Đúng giờ">
-    Đúng giờ:
-    <strong id="morningOnTime">0</strong>
-  </button>
+    <input
+      id="dailyStatsDate"
+      type="date"
+    >
+  </div>
 
-  <button class="summary-item" data-meal="Trưa" data-status="Ăn trễ">
-    Ăn trễ:
-    <strong id="morningLate">0</strong>
-  </button>
+  <div class="daily-stats-heading">
+    <h2 id="dailyStatsTitle">
+      📊 Thống kê ngày
+    </h2>
 
-  <button class="summary-item" data-meal="Trưa" data-status="Không ăn">
-    Không ăn:
-    <strong id="morningNoEat">0</strong>
-  </button>
-</div>
+    <p>Cập nhật tự động theo ngày đã chọn</p>
+  </div>
 
-<div class="meal-summary-box">
-  <h3>🌇 Chiều</h3>
+  <div class="daily-meal-card">
+    <h2>🌤️ Sáng</h2>
 
-  <button class="summary-item" data-meal="Tối" data-status="Đúng giờ">
-    Đúng giờ:
-    <strong id="afternoonOnTime">0</strong>
-  </button>
+    <div class="daily-stat-grid">
 
-  <button class="summary-item" data-meal="Tối" data-status="Ăn trễ">
-    Ăn trễ:
-    <strong id="afternoonLate">0</strong>
-  </button>
+      <div class="daily-stat-item stat-ontime">
+        <span>Đúng giờ</span>
+        <strong id="dailyMorningOnTime">0</strong>
+      </div>
 
-  <button class="summary-item" data-meal="Tối" data-status="Không ăn">
-    Không ăn:
-    <strong id="afternoonNoEat">0</strong>
-  </button>
-</div>
-</div>
+      <div class="daily-stat-item stat-late">
+        <span>Ăn trễ</span>
+        <strong id="dailyMorningLate">0</strong>
+      </div>
+
+      <div class="daily-stat-item stat-noeat">
+        <span>Không ăn</span>
+        <strong id="dailyMorningNoEat">0</strong>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="daily-meal-card">
+    <h2>🌇 Chiều</h2>
+
+    <div class="daily-stat-grid">
+
+      <div class="daily-stat-item stat-ontime">
+        <span>Đúng giờ</span>
+        <strong id="dailyAfternoonOnTime">0</strong>
+      </div>
+
+      <div class="daily-stat-item stat-late">
+        <span>Ăn trễ</span>
+        <strong id="dailyAfternoonLate">0</strong>
+      </div>
+
+      <div class="daily-stat-item stat-noeat">
+        <span>Không ăn</span>
+        <strong id="dailyAfternoonNoEat">0</strong>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="daily-stats-note">
+    ℹ️ Số liệu sẽ thay đổi theo ngày bạn chọn ở trên.
+  </div>
+
+</section>
 
 <div id="eatingPeopleList" class="eating-people-list">
   <h3>👥 Người ăn trong tuần</h3>
