@@ -753,7 +753,27 @@ $("refreshBtn")
 // ===============================
 // AUTH START
 // ===============================
+async function checkMemberAccess(user) {
+  const email = user?.email;
 
+  if (!email) {
+    return false;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("members")
+    .select("email, active")
+    .eq("email", email.toLowerCase())
+    .eq("active", true)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Lỗi kiểm tra thành viên:", error);
+    return false;
+  }
+
+  return !!data;
+}
 supabaseClient.auth
   .getSession()
   .then(({ data }) => {
