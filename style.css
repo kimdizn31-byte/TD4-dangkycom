@@ -517,3 +517,51 @@ th{
     font-size: 12px;
   }
 }
+/* ===== MENU ĐIỀU HƯỚNG ===== */
+
+.main-nav {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  margin-bottom: 18px;
+  overflow-x: auto;
+  background: #111;
+  border: 1px solid #2a2a2a;
+  border-radius: 14px;
+}
+
+.nav-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 12px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #aaa;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.nav-btn:hover {
+  background: #1d1d1d;
+  color: white;
+}
+
+.nav-btn.active {
+  background: white;
+  color: black;
+}
+
+@media (max-width: 600px) {
+  .main-nav {
+    gap: 5px;
+    padding: 6px;
+  }
+
+  .nav-btn {
+    min-width: 105px;
+    padding: 10px 7px;
+    font-size: 12px;
+  }
+}
