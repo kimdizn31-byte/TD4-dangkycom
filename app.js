@@ -918,6 +918,40 @@ function renderWeeklyMenu() {
   document.getElementById("menuWeekLabel").textContent =
     `${shortDate(menuWeekStart)} - ${shortDate(addDays(menuWeekStart, 6))}`;
 }
+function randomWeeklyMenu() {
+  const inputs = [
+    ...document.querySelectorAll(".menu-input")
+  ];
+
+  const dishes = inputs
+    .map((input) => input.value.trim())
+    .filter((dish) => dish !== "");
+
+  if (dishes.length < 2) {
+    alert("Cần ít nhất 2 món để Random.");
+    return;
+  }
+
+  for (let i = dishes.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+
+    [dishes[i], dishes[j]] =
+      [dishes[j], dishes[i]];
+  }
+
+  let index = 0;
+
+  inputs.forEach((input) => {
+    if (input.value.trim() !== "") {
+      input.value = dishes[index];
+      index++;
+    }
+  });
+}
+
+document
+  .getElementById("randomMenuBtn")
+  ?.addEventListener("click", randomWeeklyMenu);
 async function saveWeeklyMenu() {
   const inputs = document.querySelectorAll(".menu-input");
   const rows = [];
