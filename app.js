@@ -1,113 +1,643 @@
 const SUPABASE_URL = "https://usgecirqtmoldcvvwcxk.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable__qbpft3pHINGK3sweQHL7w_DLc5zZMt";
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-const $ = id => document.getElementById(id);
-let session = null, selectedMeal = "Trưa", selectedStatus = "Đúng giờ", rows = [];
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
 
-function localDate(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Ho_Chi_Minh"}).format(new Date())}
-function nowVN(){return new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Ho_Chi_Minh"}))}
-function minutesNow(){const d=nowVN();return d.getHours()*60+d.getMinutes()}
-function timeText(){const d=nowVN();return d.toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit",second:"2-digit"})+" • "+d.toLocaleDateString("vi-VN")}
-function statusWindow(meal){return meal==="Trưa"?"trước 10:30":"trước 17:30"}
-function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+const $ = (id) => document.getElementById(id);
 
-function showApp(){
-  $("loginView").classList.add("hidden");$("appView").classList.remove("hidden");$("userBox").classList.remove("hidden");
-  $("userEmail").textContent=session.user.email||"Đã đăng nhập";
-  $("mealDate").value=localDate();$("filterDate").value=localDate();
-  updateClock();setInterval(updateClock,1000);updateNotice();loadRows();
-}
-function updateClock(){$("clockBox").innerHTML=`${timeText()}<small>Giờ Việt Nam</small>`;$("todayLabel").textContent=localDate();$("summaryDate").textContent=$("filterDate").value}
-function updateNotice(){
-  const date=$("mealDate").value||localDate();
-  let t=date===localDate()?"Đăng ký mới hôm nay chỉ được thực hiện trước 08:00.":"Bạn đang chọn ngày khác.";
-  t+=` Đổi Đúng giờ/Ăn trễ: Trưa ${statusWindow("Trưa")}; Tối ${statusWindow("Tối")}.`;
-  $("notice").textContent=t;
-}
-async function login(){
-  $("loginError").textContent="";
- const {error}=await supabaseClient.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin+location.pathname}});
-  if(error)$("loginError").textContent=error.message;
-}
-async function logout(){await supabaseClient.auth.signOut();location.reload()}
+let session = null;
+let currentWeekStart = getMonday(new Date());
+let weekRowsData = [];
+let myRegistrations = [];
 
-async function loadRows(){
-  const date=$("filterDate").value||localDate(),meal=$("filterMeal").value;
- let q=supabaseClient.from("meal_registrations")
-  if(meal)q=q.eq("meal",meal);
-  const {data,error}=await q;
-  if(error){$("registrationTable").innerHTML=`<tr><td colspan="6" class="empty">${escapeHtml(error.message)}</td></tr>`;return}
-  rows=data||[];renderRows();renderStats();
-}
-function renderRows(){
-  if(!rows.length){$("registrationTable").innerHTML='<tr><td colspan="6" class="empty">Chưa có đăng ký</td></tr>';return}
-  $("registrationTable").innerHTML=rows.map(r=>`<tr>
-    <td><strong>${escapeHtml(r.name)}</strong></td><td>${escapeHtml(r.email)}</td>
-    <td>${escapeHtml(r.meal_date)}</td><td>${r.meal==="Trưa"?"☀️":"🌙"} ${escapeHtml(r.meal)}</td>
-    <td><span class="badge">${escapeHtml(r.status)}</span></td>
-    <td>${new Date(r.created_at).toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"})}</td>
-  </tr>`).join("");
-}
-function renderStats(){
-  $("totalCount").textContent=rows.length;
-  $("onTimeCount").textContent=rows.filter(x=>x.status==="Đúng giờ").length;
-  $("lateCount").textContent=rows.filter(x=>x.status==="Ăn trễ").length;
-  $("noEatCount").textContent=rows.filter(x=>x.status==="Không ăn").length;
-  $("lunchCount").textContent=rows.filter(x=>x.meal==="Trưa").length;
-  $("dinnerCount").textContent=rows.filter(x=>x.meal==="Tối").length;
-  $("summaryDate").textContent=$("filterDate").value;
+const MEALS = ["Trưa", "Tối"];
+const STATUSES = ["Đúng giờ", "Ăn trễ", "Không ăn"];
+
+// ===============================
+// DATE / TIME
+// ===============================
+
+function vnNow() {
+  return new Date(
+    new Date().toLocaleString("en-US", {
+      timeZone: "Asia/Ho_Chi_Minh"
+    })
+  );
 }
 
-async function registerOrUpdate(){
-  $("formMessage").textContent="";
-  const date=$("mealDate").value;
-  if(!date){$("formMessage").textContent="Hãy chọn ngày ăn.";return}
-  if(date<localDate()){$("formMessage").textContent="Không thể đăng ký ngày đã qua.";return}
+function localDateString(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
 
- const {data:existing,error:findError}=await supabaseClient.from("meal_registrations")
-    .select("id,status").eq("user_id",session.user.id).eq("meal_date",date).eq("meal",selectedMeal).maybeSingle();
-  if(findError){$("formMessage").textContent=findError.message;return}
+  return `${y}-${m}-${d}`;
+}
 
-  if(existing){
-    if(selectedStatus==="Không ăn"){$("formMessage").textContent="Đã đăng ký rồi thì không thể đổi sang 'Không ăn'.";return}
-    const currentMinutes = minutesNow();
-    const deadline = selectedMeal==="Trưa" ? 10*60+30 : 17*60+30;
-    if(date===localDate() && currentMinutes >= deadline){
-      $("formMessage").textContent=`Đã quá giờ đổi trạng thái (${selectedMeal==="Trưa"?"10:30":"17:30"}).`;
-      return;
+function displayDate(date) {
+  return date.toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  });
+}
+
+function shortDate(date) {
+  return date.toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit"
+  });
+}
+
+function getMonday(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+
+  d.setDate(d.getDate() + diff);
+
+  return d;
+}
+
+function addDays(date, days) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+function dayName(date) {
+  const names = [
+    "Chủ nhật",
+    "Thứ 2",
+    "Thứ 3",
+    "Thứ 4",
+    "Thứ 5",
+    "Thứ 6",
+    "Thứ 7"
+  ];
+
+  return names[date.getDay()];
+}
+
+function todayString() {
+  return localDateString(vnNow());
+}
+
+function weekEnd() {
+  return addDays(currentWeekStart, 6);
+}
+
+// ===============================
+// CLOCK
+// ===============================
+
+function updateClock() {
+  const now = vnNow();
+
+  $("clockBox").innerHTML = `
+    ${now.toLocaleTimeString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    })}
+    <small>
+      ${now.toLocaleDateString("vi-VN")} · Giờ Việt Nam
+    </small>
+  `;
+}
+
+// ===============================
+// LOGIN
+// ===============================
+
+async function login() {
+  $("loginError").textContent = "";
+
+  const { error } =
+    await supabaseClient.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo:
+          location.origin + location.pathname
+      }
+    });
+
+  if (error) {
+    $("loginError").textContent = error.message;
+  }
+}
+
+async function logout() {
+  await supabaseClient.auth.signOut();
+  location.reload();
+}
+
+// ===============================
+// SHOW APP
+// ===============================
+
+async function showApp() {
+  $("loginView").classList.add("hidden");
+  $("appView").classList.remove("hidden");
+  $("userBox").classList.remove("hidden");
+
+  $("userEmail").textContent =
+    session?.user?.email || "Đã đăng nhập";
+
+  updateClock();
+
+  setInterval(updateClock, 1000);
+
+  await loadWeek();
+}
+
+// ===============================
+// WEEK HEADER
+// ===============================
+
+function updateWeekLabels() {
+  const end = weekEnd();
+
+  const text =
+    `${shortDate(currentWeekStart)} - ${shortDate(end)}`;
+
+  $("weekLabel").textContent = text;
+  $("summaryWeek").textContent = text;
+  $("listWeekLabel").textContent = text;
+}
+
+// ===============================
+// BUILD WEEK UI
+// ===============================
+
+function renderWeekRows() {
+  const container = $("weekRows");
+
+  container.innerHTML = "";
+
+  for (let i = 0; i < 7; i++) {
+    const date = addDays(currentWeekStart, i);
+    const dateStr = localDateString(date);
+
+    const row = document.createElement("div");
+
+    row.className = "week-row";
+
+    if (dateStr === todayString()) {
+      row.classList.add("today-row");
     }
-    const {error}=await supabaseClient.from("meal_registrations").update({status:selectedStatus}).eq("id",existing.id);
-    $("formMessage").textContent=error?error.message:"Đã cập nhật trạng thái.";
-    loadRows();return;
+
+    row.innerHTML = `
+      <div class="week-date-cell">
+        <strong>${dayName(date)}</strong>
+        <span>${displayDate(date)}</span>
+      </div>
+
+      ${mealCell(dateStr, "Trưa")}
+
+      ${mealCell(dateStr, "Tối")}
+    `;
+
+    container.appendChild(row);
   }
 
-  const name=session.user.user_metadata?.full_name||session.user.user_metadata?.name||session.user.email?.split("@")[0]||"Người dùng";
-  const {error}=await supabaseClient.from("meal_registrations").insert({
-    user_id:session.user.id,email:session.user.email,name,meal_date:date,meal:selectedMeal,status:selectedStatus
-  });
-  $("formMessage").textContent=error?error.message:"Đăng ký thành công!";
-  if(!error){$("filterDate").value=date;loadRows()}
+  applyExistingSelections();
 }
-function selectMeal(btn){selectedMeal=btn.dataset.meal;document.querySelectorAll(".choice").forEach(x=>x.classList.toggle("active",x===btn));updateNotice()}
-function selectStatus(btn){selectedStatus=btn.dataset.status;document.querySelectorAll(".status-choice").forEach(x=>x.classList.toggle("active",x===btn))}
 
-$("googleLoginBtn").addEventListener("click",login);
-$("logoutBtn").addEventListener("click",logout);
-document.querySelectorAll(".choice").forEach(b=>b.addEventListener("click",()=>selectMeal(b)));
-document.querySelectorAll(".status-choice").forEach(b=>b.addEventListener("click",()=>selectStatus(b)));
-$("registerBtn").addEventListener("click",registerOrUpdate);
-$("refreshBtn").addEventListener("click",loadRows);
-$("filterDate").addEventListener("change",()=>{updateClock();loadRows()});
-$("filterMeal").addEventListener("change",loadRows);
-$("mealDate").addEventListener("change",updateNotice);
+function mealCell(date, meal) {
+  const key =
+    `${date}-${meal === "Trưa" ? "lunch" : "dinner"}`;
 
-supabaseClient.auth.getSession().then(({data})=>{
-  session=data.session;
-  if(session) showApp();
-});
+  return `
+    <div
+      class="meal-cell"
+      data-date="${date}"
+      data-meal="${meal}"
+    >
 
-supabaseClient.auth.onAuthStateChange((_event,newSession)=>{
-  session=newSession;
-  if(session) showApp();
-});
+      <label class="tick-option">
+        <input
+          type="radio"
+          name="${key}"
+          value="Đúng giờ"
+        >
+        <span>✓ Đúng giờ</span>
+      </label>
+
+      <label class="tick-option">
+        <input
+          type="radio"
+          name="${key}"
+          value="Ăn trễ"
+        >
+        <span>⏰ Ăn trễ</span>
+      </label>
+
+      <label class="tick-option">
+        <input
+          type="radio"
+          name="${key}"
+          value="Không ăn"
+        >
+        <span>✕ Không ăn</span>
+      </label>
+
+    </div>
+  `;
+}
+
+// ===============================
+// LOAD WEEK
+// ===============================
+
+async function loadWeek() {
+  updateWeekLabels();
+
+  $("notice").textContent =
+    "Đang tải dữ liệu tuần...";
+
+  const start = localDateString(currentWeekStart);
+  const end = localDateString(weekEnd());
+
+  const { data, error } = await supabaseClient
+    .from("meal_registrations")
+    .select("*")
+    .gte("meal_date", start)
+    .lte("meal_date", end)
+    .order("meal_date", {
+      ascending: true
+    })
+    .order("meal", {
+      ascending: true
+    });
+
+  if (error) {
+    $("notice").textContent =
+      "Lỗi tải dữ liệu: " + error.message;
+
+    return;
+  }
+
+  weekRowsData = data || [];
+
+  myRegistrations =
+    weekRowsData.filter(
+      (row) =>
+        row.user_id === session.user.id
+    );
+
+  renderWeekRows();
+  renderSummary();
+  renderRegistrationList();
+
+  $("notice").textContent =
+    "Chọn trạng thái cho từng buổi rồi bấm Lưu đăng ký tuần.";
+}
+
+// ===============================
+// RESTORE MY EXISTING CHOICES
+// ===============================
+
+function applyExistingSelections() {
+  myRegistrations.forEach((row) => {
+    const cell = document.querySelector(
+      `.meal-cell[data-date="${row.meal_date}"][data-meal="${row.meal}"]`
+    );
+
+    if (!cell) return;
+
+    const inputs =
+      cell.querySelectorAll(
+        'input[type="radio"]'
+      );
+
+    inputs.forEach((input) => {
+      if (input.value === row.status) {
+        input.checked = true;
+      }
+    });
+  });
+}
+
+// ===============================
+// SAVE WEEK
+// ===============================
+
+async function saveWeek() {
+  $("formMessage").textContent =
+    "Đang lưu...";
+
+  const cells =
+    document.querySelectorAll(
+      ".meal-cell"
+    );
+
+  let saved = 0;
+  let skipped = 0;
+  let errors = [];
+
+  for (const cell of cells) {
+    const checked =
+      cell.querySelector(
+        'input[type="radio"]:checked'
+      );
+
+    if (!checked) {
+      continue;
+    }
+
+    const date =
+      cell.dataset.date;
+
+    const meal =
+      cell.dataset.meal;
+
+    const status =
+      checked.value;
+
+    if (date < todayString()) {
+      skipped++;
+      continue;
+    }
+
+    const existing =
+      myRegistrations.find(
+        (r) =>
+          r.meal_date === date &&
+          r.meal === meal
+      );
+
+    if (existing) {
+      if (existing.status === status) {
+        continue;
+      }
+
+      const { error } =
+        await supabaseClient
+          .from("meal_registrations")
+          .update({
+            status: status
+          })
+          .eq("id", existing.id);
+
+      if (error) {
+        errors.push(
+          `${displayDate(
+            new Date(date + "T00:00:00")
+          )} ${meal}: ${error.message}`
+        );
+      } else {
+        saved++;
+      }
+
+      continue;
+    }
+
+    const name =
+      session.user.user_metadata
+        ?.full_name ||
+      session.user.user_metadata
+        ?.name ||
+      session.user.email
+        ?.split("@")[0] ||
+      "Người dùng";
+
+    const { error } =
+      await supabaseClient
+        .from("meal_registrations")
+        .insert({
+          user_id:
+            session.user.id,
+
+          email:
+            session.user.email,
+
+          name:
+            name,
+
+          meal_date:
+            date,
+
+          meal:
+            meal,
+
+          status:
+            status
+        });
+
+    if (error) {
+      errors.push(
+        `${displayDate(
+          new Date(date + "T00:00:00")
+        )} ${meal}: ${error.message}`
+      );
+    } else {
+      saved++;
+    }
+  }
+
+  if (errors.length) {
+    $("formMessage").textContent =
+      `Đã lưu ${saved} mục. Có lỗi: ${errors[0]}`;
+  } else if (saved === 0) {
+    $("formMessage").textContent =
+      "Không có thay đổi mới để lưu.";
+  } else {
+    $("formMessage").textContent =
+      `✓ Đã lưu ${saved} lựa chọn.`;
+  }
+
+  await loadWeek();
+}
+
+// ===============================
+// SUMMARY
+// ===============================
+
+function renderSummary() {
+  $("totalCount").textContent =
+    weekRowsData.length;
+
+  $("onTimeCount").textContent =
+    weekRowsData.filter(
+      (x) =>
+        x.status === "Đúng giờ"
+    ).length;
+
+  $("lateCount").textContent =
+    weekRowsData.filter(
+      (x) =>
+        x.status === "Ăn trễ"
+    ).length;
+
+  $("noEatCount").textContent =
+    weekRowsData.filter(
+      (x) =>
+        x.status === "Không ăn"
+    ).length;
+
+  $("lunchCount").textContent =
+    weekRowsData.filter(
+      (x) =>
+        x.meal === "Trưa"
+    ).length;
+
+  $("dinnerCount").textContent =
+    weekRowsData.filter(
+      (x) =>
+        x.meal === "Tối"
+    ).length;
+}
+
+// ===============================
+// REGISTRATION LIST
+// ===============================
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function renderRegistrationList() {
+  const body =
+    $("registrationTable");
+
+  if (!weekRowsData.length) {
+    body.innerHTML = `
+      <tr>
+        <td
+          colspan="5"
+          class="empty"
+        >
+          Chưa có dữ liệu
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  body.innerHTML =
+    weekRowsData
+      .map((row) => {
+        return `
+          <tr>
+            <td>
+              ${escapeHtml(row.name)}
+            </td>
+
+            <td>
+              ${escapeHtml(row.email)}
+            </td>
+
+            <td>
+              ${escapeHtml(row.meal_date)}
+            </td>
+
+            <td>
+              ${row.meal === "Trưa"
+                ? "🌞 Trưa"
+                : "🌙 Tối"}
+            </td>
+
+            <td>
+              <span class="badge">
+                ${escapeHtml(row.status)}
+              </span>
+            </td>
+          </tr>
+        `;
+      })
+      .join("");
+}
+
+// ===============================
+// WEEK NAVIGATION
+// ===============================
+
+async function previousWeek() {
+  currentWeekStart =
+    addDays(currentWeekStart, -7);
+
+  await loadWeek();
+}
+
+async function nextWeek() {
+  currentWeekStart =
+    addDays(currentWeekStart, 7);
+
+  await loadWeek();
+}
+
+// ===============================
+// EVENTS
+// ===============================
+
+$("googleLoginBtn")
+  .addEventListener(
+    "click",
+    login
+  );
+
+$("logoutBtn")
+  .addEventListener(
+    "click",
+    logout
+  );
+
+$("prevWeekBtn")
+  .addEventListener(
+    "click",
+    previousWeek
+  );
+
+$("nextWeekBtn")
+  .addEventListener(
+    "click",
+    nextWeek
+  );
+
+$("saveWeekBtn")
+  .addEventListener(
+    "click",
+    saveWeek
+  );
+
+$("refreshBtn")
+  .addEventListener(
+    "click",
+    loadWeek
+  );
+
+// ===============================
+// AUTH START
+// ===============================
+
+supabaseClient.auth
+  .getSession()
+  .then(({ data }) => {
+    session = data.session;
+
+    if (session) {
+      showApp();
+    }
+  });
+
+supabaseClient.auth
+  .onAuthStateChange(
+    (_event, newSession) => {
+      session = newSession;
+
+      if (session) {
+        showApp();
+      }
+    }
+  );
