@@ -506,40 +506,113 @@ if (existing) {
 // ===============================
 
 function renderSummary() {
-  $("totalCount").textContent =
-    weekRowsData.length;
+  const select = $("summaryDate");
 
-  $("onTimeCount").textContent =
-    weekRowsData.filter(
-      (x) =>
-        x.status === "Đúng giờ"
-    ).length;
+  // Tạo danh sách 7 ngày của tuần
+  const currentValue = select.value;
 
-  $("lateCount").textContent =
-    weekRowsData.filter(
-      (x) =>
-        x.status === "Ăn trễ"
-    ).length;
+  select.innerHTML = "";
 
-  $("noEatCount").textContent =
-    weekRowsData.filter(
-      (x) =>
-        x.status === "Không ăn"
-    ).length;
+  for (let i = 0; i < 7; i++) {
+    const date = addDays(currentWeekStart, i);
+    const dateStr = localDateString(date);
 
-  $("lunchCount").textContent =
-    weekRowsData.filter(
-      (x) =>
-        x.meal === "Trưa"
-    ).length;
+    const option = document.createElement("option");
+    option.value = dateStr;
+    option.textContent =
+      `${dayName(date)} - ${displayDate(date)}`;
 
-  $("dinnerCount").textContent =
-    weekRowsData.filter(
-      (x) =>
-        x.meal === "Tối"
-    ).length;
+    select.appendChild(option);
+  }
+
+  // Giữ ngày đang chọn nếu vẫn nằm trong tuần
+  const exists = [...select.options]
+    .some((option) => option.value === currentValue);
+
+  if (exists) {
+    select.value = currentValue;
+  } else if (
+    todayString() >= localDateString(currentWeekStart) &&
+    todayString() <= localDateString(weekEnd())
+  ) {
+    select.value = todayString();
+  }
+
+  updateDailySummary();
 }
+function updateDailySummary() {
+  const date = $("summaryDate").value;
 
+  const rows = weekRowsData.filter(
+    (row) => row.meal_date === date
+  );
+
+  const count = (meal, status) =>
+    rows.filter(
+      (row) =>
+        row.meal === meal &&
+        row.status === status
+    ).length;
+
+  $("morningOnTime").textContent =
+    count("Trưa", "Đúng giờ");
+
+  $("morningLate").textContent =
+    count("Trưa", "Ăn trễ");
+
+  $("morningNoEat").textContent =
+    count("Trưa", "Không ăn");
+
+  $("afternoonOnTime").textContent =
+    count("Tối", "Đúng giờ");
+
+  $("afternoonLate").textContent =
+    count("Tối", "Ăn trễ");
+
+  $("afternoonNoEat").textContent =
+    count("Tối", "Không ăn");
+
+  $("summaryPeopleList").innerHTML =
+    "<p>Bấm vào một mục để xem ai đã đăng ký.</p>";
+}
+function showSummaryPeople(meal, status) {
+  const date = $("summaryDate").value;
+
+  const people = weekRowsData.filter(
+    (row) =>
+      row.meal_date === date &&
+      row.meal === meal &&
+      row.status === status
+  );
+
+  const mealName =
+    meal === "Trưa" ? "🌤️ Sáng" : "🌇 Chiều";
+
+  if (people.length === 0) {
+    $("summaryPeopleList").innerHTML = `
+      <h3>${mealName} - ${status}</h3>
+      <p>Chưa có ai đăng ký.</p>
+    `;
+    return;
+  }
+
+  $("summaryPeopleList").innerHTML = `
+    <h3>${mealName} - ${status}</h3>
+
+    ${people
+      .map(
+        (person, index) => `
+          <div class="summary-person">
+            <strong>
+              ${index + 1}. ${escapeHtml(person.name)}
+            </strong>
+            <span>${escapeHtml(person.email)}</span>
+          </div>
+        `
+      )
+      .join("")}
+  `;
+}
 // ===============================
 // REGISTRATION LIST
 // ===============================
@@ -628,6 +701,21 @@ async function nextWeek() {
 // EVENTS
 // ===============================
 
+$("summaryDate").addEventListener(
+  "change",
+  updateDailySummary
+);
+
+document
+  .querySelectorAll(".summary-item")
+  .forEach((button) => {
+    button.addEventListener("click", () => {
+      showSummaryPeople(
+        button.dataset.meal,
+        button.dataset.status
+      );
+    });
+  });
 $("googleLoginBtn")
   .addEventListener(
     "click",
