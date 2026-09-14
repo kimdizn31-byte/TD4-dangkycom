@@ -1009,3 +1009,133 @@ th{
     padding: 8px 0;
   }
 }
+/* ===== DAILY STATS ===== */
+
+.daily-stats-card {
+  margin-top: 18px;
+}
+
+.daily-date-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.daily-date-box label {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.daily-date-box input {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid #333;
+  border-radius: 12px;
+  background: #141414;
+  color: white;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.daily-stats-heading {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.daily-stats-heading h2 {
+  margin-bottom: 6px;
+}
+
+.daily-stats-heading p {
+  margin: 0;
+  color: #aaa;
+}
+
+.daily-meal-card {
+  padding: 14px;
+  margin-bottom: 14px;
+  border: 1px solid #2d2d2d;
+  border-radius: 14px;
+  background: #121212;
+}
+
+.daily-meal-card h2 {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.daily-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.daily-stat-item {
+  min-height: 92px;
+  padding: 12px 8px;
+  border-radius: 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+
+.daily-stat-item span {
+  font-size: 14px;
+}
+
+.daily-stat-item strong {
+  font-size: 28px;
+}
+
+.stat-ontime {
+  border: 1px solid #1d8f4d;
+  background: rgba(29, 143, 77, 0.12);
+}
+
+.stat-late {
+  border: 1px solid #b96a00;
+  background: rgba(185, 106, 0, 0.12);
+}
+
+.stat-noeat {
+  border: 1px solid #b52b2b;
+  background: rgba(181, 43, 43, 0.12);
+}
+
+.daily-stats-note {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #1565a8;
+  border-radius: 12px;
+  background: rgba(21, 101, 168, 0.12);
+  font-size: 14px;
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+  .daily-stats-card {
+    padding: 12px;
+  }
+
+  .daily-stat-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .daily-stat-item {
+    min-height: 72px;
+  }
+
+  .daily-stat-item strong {
+    font-size: 24px;
+  }
+
+  .daily-meal-card {
+    padding: 12px;
+  }
+}
