@@ -840,6 +840,9 @@ function openPage(page) {
   updateMenuAdminControls();
    loadMenuPool();
 }
+  if (page === "summary") {
+  renderWeeklySummary();
+}
   const activeBtn = document.querySelector(
     `.nav-btn[data-page="${page}"]`
   );
