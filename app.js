@@ -1075,8 +1075,24 @@ async function saveMenuPool() {
     .map((dish) => dish.trim())
     .filter((dish) => dish !== "");
 
+  // Tắt toàn bộ món cũ trước
+  const { error: disableError } = await supabaseClient
+    .from("menu_pool")
+    .update({
+      active: false
+    })
+    .eq("active", true);
+
+  if (disableError) {
+    console.error("Lỗi cập nhật kho món:", disableError);
+    alert("Không lưu được kho món.");
+    return;
+  }
+
+  // Nếu đã xóa hết món thì dừng ở đây
   if (dishes.length === 0) {
-    alert("Bạn chưa nhập món.");
+    alert("Đã xóa toàn bộ món trong kho ✅");
+    await loadMenuPool();
     return;
   }
 
@@ -1100,7 +1116,6 @@ async function saveMenuPool() {
   alert("Đã lưu kho món ✅");
   await loadMenuPool();
 }
-
 document
   .getElementById("saveMenuPoolBtn")
   ?.addEventListener("click", saveMenuPool);
