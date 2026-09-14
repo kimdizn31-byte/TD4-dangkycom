@@ -819,7 +819,40 @@ supabaseClient.auth.onAuthStateChange(
   }
 );
 // ===== ĐIỀU HƯỚNG TRANG =====
+let summaryWeekStart = new Date(currentWeekStart);
 
+function renderWeeklySummary() {
+  const container = document.getElementById("weeklySummaryRows");
+
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  for (let i = 0; i < 7; i++) {
+    const date = addDays(summaryWeekStart, i);
+
+    container.innerHTML += `
+      <div class="summary-day">
+        <h3>${dayName(date)} - ${displayDate(date)}</h3>
+
+        <div class="summary-meals">
+          <div class="summary-meal-box">
+            <strong>🌤️ Sáng</strong>
+            <div>Chưa tải dữ liệu</div>
+          </div>
+
+          <div class="summary-meal-box">
+            <strong>🌇 Chiều</strong>
+            <div>Chưa tải dữ liệu</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  document.getElementById("summaryWeekLabel").textContent =
+    `${shortDate(summaryWeekStart)} - ${shortDate(addDays(summaryWeekStart, 6))}`;
+}
 function openPage(page) {
   document.querySelectorAll(".app-page").forEach((el) => {
     el.classList.add("hidden");
