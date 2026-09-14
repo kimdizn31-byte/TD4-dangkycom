@@ -90,6 +90,70 @@ function todayString() {
 function weekEnd() {
   return addDays(currentWeekStart, 6);
 }
+// ===============================
+// TIME RULES
+// ===============================
+
+function getVietnamMinutes() {
+  const now = vnNow();
+  return now.getHours() * 60 + now.getMinutes();
+}
+
+function canRegister(date, meal, existing) {
+  const today = todayString();
+
+  // Ngày đã qua: không được thay đổi
+  if (date < today) {
+    return {
+      allowed: false,
+      message: "Ngày này đã qua."
+    };
+  }
+
+  // Ngày tương lai: được đăng ký
+  if (date > today) {
+    return {
+      allowed: true
+    };
+  }
+
+  const minutes = getVietnamMinutes();
+
+  // Hạn đăng ký mới trong ngày: 08:00
+  if (!existing) {
+    if (minutes >= 8 * 60) {
+      return {
+        allowed: false,
+        message: "Đã quá 08:00. Không thể đăng ký mới cho hôm nay."
+      };
+    }
+
+    return {
+      allowed: true
+    };
+  }
+
+  // Sau khi đã đăng ký:
+  // chỉ cho đổi Đúng giờ <-> Ăn trễ trước giờ quy định
+  const deadline =
+    meal === "Trưa"
+      ? 10 * 60 + 30
+      : 17 * 60 + 30;
+
+  if (minutes >= deadline) {
+    return {
+      allowed: false,
+      message:
+        meal === "Trưa"
+          ? "Đã quá 10:30. Không thể thay đổi suất trưa."
+          : "Đã quá 17:30. Không thể thay đổi suất tối."
+    };
+  }
+
+  return {
+    allowed: true
+  };
+}
 
 // ===============================
 // CLOCK
@@ -370,32 +434,53 @@ async function saveWeek() {
           r.meal_date === date &&
           r.meal === meal
       );
+    const permission = canRegister(date, meal, existing);
 
-    if (existing) {
-      if (existing.status === status) {
-        continue;
-      }
+if (!permission.allowed) {
+  errors.push(
+    `${displayDate(
+      new Date(date + "T00:00:00")
+    )} ${meal}: ${permission.message}`
+  );
+  continue;
+}
 
-      const { error } =
-        await supabaseClient
-          .from("meal_registrations")
-          .update({
-            status: status
-          })
-          .eq("id", existing.id);
+    if (existing && existing.status === status) {
+  continue;
+}
 
-      if (error) {
-        errors.push(
-          `${displayDate(
-            new Date(date + "T00:00:00")
-          )} ${meal}: ${error.message}`
-        );
-      } else {
-        saved++;
-      }
+const permission = canRegister(date, meal, existing);
 
-      continue;
-    }
+if (!permission.allowed) {
+  errors.push(
+    `${displayDate(
+      new Date(date + "T00:00:00")
+    )} ${meal}: ${permission.message}`
+  );
+  continue;
+}
+
+if (existing) {
+  const { error } =
+    await supabaseClient
+      .from("meal_registrations")
+      .update({
+        status: status
+      })
+      .eq("id", existing.id);
+
+  if (error) {
+    errors.push(
+      `${displayDate(
+        new Date(date + "T00:00:00")
+      )} ${meal}: ${error.message}`
+    );
+  } else {
+    saved++;
+  }
+
+  continue;
+}
 
     const name =
       session.user.user_metadata
