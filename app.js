@@ -817,3 +817,34 @@ supabaseClient.auth.onAuthStateChange(
     handleSession(newSession);
   }
 );
+// ===== ĐIỀU HƯỚNG TRANG =====
+
+function openPage(page) {
+  document.querySelectorAll(".app-page").forEach((el) => {
+    el.classList.add("hidden");
+  });
+
+  document.querySelectorAll(".nav-btn").forEach((btn) => {
+    btn.classList.remove("active");
+  });
+
+  const target = document.getElementById(`${page}Page`);
+
+  if (target) {
+    target.classList.remove("hidden");
+  }
+
+  const activeBtn = document.querySelector(
+    `.nav-btn[data-page="${page}"]`
+  );
+
+  if (activeBtn) {
+    activeBtn.classList.add("active");
+  }
+}
+
+document.querySelectorAll(".nav-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    openPage(btn.dataset.page);
+  });
+});
