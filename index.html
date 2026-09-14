@@ -118,53 +118,47 @@
 
 
     <!-- TỔNG KẾT -->
-    <section class="card">
+   <div class="meal-summary-box">
+  <h3>🌤️ Sáng</h3>
 
-      <div class="card-title">
-        <h2>Tổng kết tuần</h2>
-        <span id="summaryWeek"></span>
-      </div>
+  <button class="summary-item" data-meal="Trưa" data-status="Đúng giờ">
+    Đúng giờ:
+    <strong id="morningOnTime">0</strong>
+  </button>
 
-      <div class="stats">
+  <button class="summary-item" data-meal="Trưa" data-status="Ăn trễ">
+    Ăn trễ:
+    <strong id="morningLate">0</strong>
+  </button>
 
-        <div class="stat">
-          <strong id="totalCount">0</strong>
-          <span>Tổng đăng ký</span>
-        </div>
+  <button class="summary-item" data-meal="Trưa" data-status="Không ăn">
+    Không ăn:
+    <strong id="morningNoEat">0</strong>
+  </button>
+</div>
 
-        <div class="stat">
-          <strong id="onTimeCount">0</strong>
-          <span>Đúng giờ</span>
-        </div>
+<div class="meal-summary-box">
+  <h3>🌇 Chiều</h3>
 
-        <div class="stat">
-          <strong id="lateCount">0</strong>
-          <span>Ăn trễ</span>
-        </div>
+  <button class="summary-item" data-meal="Tối" data-status="Đúng giờ">
+    Đúng giờ:
+    <strong id="afternoonOnTime">0</strong>
+  </button>
 
-        <div class="stat">
-          <strong id="noEatCount">0</strong>
-          <span>Không ăn</span>
-        </div>
+  <button class="summary-item" data-meal="Tối" data-status="Ăn trễ">
+    Ăn trễ:
+    <strong id="afternoonLate">0</strong>
+  </button>
 
-      </div>
+  <button class="summary-item" data-meal="Tối" data-status="Không ăn">
+    Không ăn:
+    <strong id="afternoonNoEat">0</strong>
+  </button>
+</div>
 
-      <div class="meal-summary">
-
-        <div>
-          <span>🌞 Trưa</span>
-          <strong id="lunchCount">0</strong>
-        </div>
-
-        <div>
-          <span>🌙 Tối</span>
-          <strong id="dinnerCount">0</strong>
-        </div>
-
-      </div>
-
-    </section>
-
+<div id="summaryPeopleList" class="summary-people-list">
+  <p>Chọn một mục để xem ai đã đăng ký.</p>
+</div>
 
     <!-- DANH SÁCH -->
     <section class="card">
