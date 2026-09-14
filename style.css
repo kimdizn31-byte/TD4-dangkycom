@@ -630,3 +630,72 @@ th{
     font-size: 14px;
   }
 }
+/* ===== TỔNG HỢP TUẦN ===== */
+
+#weeklySummaryRows {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.summary-day {
+  padding: 18px;
+  border: 1px solid #333;
+  border-radius: 16px;
+  background: #151515;
+}
+
+.summary-day h3 {
+  margin: 0 0 15px;
+  font-size: 18px;
+}
+
+.summary-meals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.summary-meal-box {
+  min-height: 90px;
+  padding: 15px;
+  border: 1px solid #333;
+  border-radius: 13px;
+  background: #1b1b1b;
+}
+
+.summary-meal-box strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+/* Điện thoại */
+@media (max-width: 600px) {
+  #weeklySummaryRows {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .summary-day {
+    padding: 13px;
+  }
+
+  .summary-meals {
+    gap: 7px;
+  }
+
+  .summary-meal-box {
+    padding: 11px;
+    min-height: 80px;
+  }
+
+  .summary-day h3 {
+    font-size: 16px;
+  }
+
+  .summary-meal-box strong {
+    font-size: 14px;
+  }
+}
