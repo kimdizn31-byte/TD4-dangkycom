@@ -1,7 +1,7 @@
-const SUPABASE_URL = "YOUR_SUPABASE_URL";
-const SUPABASE_PUBLISHABLE_KEY = "YOUR_SUPABASE_PUBLISHABLE_KEY";
+const SUPABASE_URL = "https://usgecirqtmoldcvvwcxk.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable__qbpft3pHINGK3sweQHL7w_DLc5zZMt";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 const $ = id => document.getElementById(id);
 let session = null, selectedMeal = "Trưa", selectedStatus = "Đúng giờ", rows = [];
 
@@ -27,10 +27,10 @@ function updateNotice(){
 }
 async function login(){
   $("loginError").textContent="";
-  const {error}=await supabase.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin+location.pathname}});
+  const {error}=awaitsupabaseClient.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin+location.pathname}});
   if(error)$("loginError").textContent=error.message;
 }
-async function logout(){await supabase.auth.signOut();location.reload()}
+async function logout(){await supabaseClient.auth.signOut();location.reload()}
 
 async function loadRows(){
   const date=$("filterDate").value||localDate(),meal=$("filterMeal").value;
