@@ -716,3 +716,88 @@ th{
 .menu-input[readonly]::placeholder {
   color: #777;
 }
+/* ===== NGƯỜI ĂN TRONG TUẦN ===== */
+
+.eating-people-list {
+  margin-top: 18px;
+}
+
+.eating-people-list h3 {
+  margin-bottom: 12px;
+}
+
+.eating-day-card {
+  margin-bottom: 12px;
+  padding: 14px;
+  border: 1px solid #2f2f2f;
+  border-radius: 14px;
+  background: #151515;
+}
+
+.eating-day-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.eating-day-title strong {
+  font-size: 16px;
+}
+
+.eating-day-title span {
+  color: #aaa;
+}
+
+.eating-meals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.eating-count-btn {
+  width: 100%;
+  padding: 12px 8px;
+  border: 1px solid #333;
+  border-radius: 10px;
+  background: #202020;
+  color: white;
+  cursor: pointer;
+}
+
+.eating-count-btn:hover {
+  background: #2a2a2a;
+}
+
+.eating-count-btn strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 16px;
+}
+
+.eating-names {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #0f0f0f;
+}
+
+.eating-person {
+  padding: 6px 0;
+  border-bottom: 1px solid #262626;
+}
+
+.eating-person:last-child {
+  border-bottom: 0;
+}
+
+@media (max-width: 600px) {
+  .eating-day-card {
+    padding: 12px;
+  }
+
+  .eating-count-btn {
+    font-size: 13px;
+    padding: 10px 5px;
+  }
+}
