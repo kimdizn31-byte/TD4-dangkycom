@@ -956,3 +956,22 @@ async function saveWeeklyMenu() {
 document
   .getElementById("saveMenuBtn")
   ?.addEventListener("click", saveWeeklyMenu);
+async function changeMenuWeek(days) {
+  currentWeekStart = addDays(currentWeekStart, days);
+
+  renderWeeklyMenu();
+  await loadWeeklyMenu();
+}
+
+document
+  .getElementById("menuPrevWeek")
+  ?.addEventListener("click", () => {
+    changeMenuWeek(-7);
+  });
+
+document
+  .getElementById("menuNextWeek")
+  ?.addEventListener("click", () => {
+    changeMenuWeek(7);
+  });
+
