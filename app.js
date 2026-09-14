@@ -274,7 +274,7 @@ function renderWeekRows() {
 
 function mealCell(date, meal) {
   const key =
-    `${date}-${meal === "Trưa" ? "lunch" : "dinner"}`;
+    `${date}-${meal === "Trưa" ? "morning" : "afternoon"}`;
 
   return `
     <div
@@ -282,34 +282,12 @@ function mealCell(date, meal) {
       data-date="${date}"
       data-meal="${meal}"
     >
-
-      <label class="tick-option">
-        <input
-          type="radio"
-          name="${key}"
-          value="Đúng giờ"
-        >
-        <span>✓ Đúng giờ</span>
-      </label>
-
-      <label class="tick-option">
-        <input
-          type="radio"
-          name="${key}"
-          value="Ăn trễ"
-        >
-        <span>⏰ Ăn trễ</span>
-      </label>
-
-      <label class="tick-option">
-        <input
-          type="radio"
-          name="${key}"
-          value="Không ăn"
-        >
-        <span>✕ Không ăn</span>
-      </label>
-
+      <select name="${key}" class="meal-select">
+        <option value="">Chọn trạng thái</option>
+        <option value="Đúng giờ">✓ Đúng giờ</option>
+        <option value="Ăn trễ">⏰ Ăn trễ</option>
+        <option value="Không ăn">✕ Không ăn</option>
+      </select>
     </div>
   `;
 }
@@ -374,16 +352,11 @@ function applyExistingSelections() {
 
     if (!cell) return;
 
-    const inputs =
-      cell.querySelectorAll(
-        'input[type="radio"]'
-      );
+    const select = cell.querySelector(".meal-select");
 
-    inputs.forEach((input) => {
-      if (input.value === row.status) {
-        input.checked = true;
-      }
-    });
+    if (!select) return;
+
+    select.value = row.status;
   });
 }
 
@@ -405,14 +378,12 @@ async function saveWeek() {
   let errors = [];
 
   for (const cell of cells) {
-    const checked =
-      cell.querySelector(
-        'input[type="radio"]:checked'
-      );
+    const select =
+  cell.querySelector(".meal-select");
 
-    if (!checked) {
-      continue;
-    }
+if (!select || !select.value) {
+  continue;
+}
 
     const date =
       cell.dataset.date;
@@ -420,9 +391,9 @@ async function saveWeek() {
     const meal =
       cell.dataset.meal;
 
-    const status =
-      checked.value;
-
+ const status =
+  select.value;
+    
     if (date < todayString()) {
       skipped++;
       continue;
