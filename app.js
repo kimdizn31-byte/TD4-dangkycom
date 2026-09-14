@@ -779,10 +779,16 @@ supabaseClient.auth
   .then(({ data }) => {
     session = data.session;
 
-    if (session) {
+ if (session) {
+  checkMemberAccess(session.user).then((allowed) => {
+    if (allowed) {
       showApp();
+    } else {
+      alert("Tài khoản này không thuộc danh sách thành viên.");
+      supabaseClient.auth.signOut();
     }
   });
+}
 
 supabaseClient.auth
   .onAuthStateChange(
@@ -790,7 +796,12 @@ supabaseClient.auth
       session = newSession;
 
       if (session) {
-        showApp();
-      }
+  checkMemberAccess(session.user).then((allowed) => {
+    if (allowed) {
+      showApp();
+    } else {
+      alert("Tài khoản này không thuộc danh sách thành viên.");
+      supabaseClient.auth.signOut();
     }
-  );
+  });
+}
