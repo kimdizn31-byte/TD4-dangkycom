@@ -918,20 +918,26 @@ function renderWeeklyMenu() {
   document.getElementById("menuWeekLabel").textContent =
     `${shortDate(menuWeekStart)} - ${shortDate(addDays(menuWeekStart, 6))}`;
 }
-function randomWeeklyMenu() {
-  const inputs = [
-    ...document.querySelectorAll(".menu-input")
-  ];
+async function randomWeeklyMenu() {
+  const { data, error } = await supabaseClient
+    .from("menu_pool")
+    .select("dish_name")
+    .eq("active", true);
 
-  const dishes = inputs
-    .map((input) => input.value.trim())
-    .filter((dish) => dish !== "");
-
-  if (dishes.length < 2) {
-    alert("Cần ít nhất 2 món để Random.");
+  if (error) {
+    console.error("Lỗi tải kho món:", error);
+    alert("Không tải được kho món.");
     return;
   }
 
+  const dishes = data.map((row) => row.dish_name);
+
+  if (dishes.length === 0) {
+    alert("Kho món đang trống.");
+    return;
+  }
+
+  // Xáo trộn kho món
   for (let i = dishes.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
 
@@ -939,16 +945,14 @@ function randomWeeklyMenu() {
       [dishes[j], dishes[i]];
   }
 
-  let index = 0;
+  const inputs = [
+    ...document.querySelectorAll(".menu-input")
+  ];
 
-  inputs.forEach((input) => {
-    if (input.value.trim() !== "") {
-      input.value = dishes[index];
-      index++;
-    }
+  inputs.forEach((input, index) => {
+    input.value = dishes[index % dishes.length];
   });
 }
-
 document
   .getElementById("randomMenuBtn")
   ?.addEventListener("click", randomWeeklyMenu);
