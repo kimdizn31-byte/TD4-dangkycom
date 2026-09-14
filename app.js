@@ -843,6 +843,47 @@ async function loadMembers() {
     </div>
   `).join("");
 }
+async function addMember() {
+  const input = document.getElementById("newMemberEmail");
+  const email = input?.value.trim().toLowerCase();
+
+  if (!email) {
+    alert("Hãy nhập Gmail.");
+    return;
+  }
+
+  if (!email.includes("@")) {
+    alert("Gmail không hợp lệ.");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("members")
+    .upsert(
+      {
+        email: email,
+        active: true
+      },
+      {
+        onConflict: "email"
+      }
+    );
+
+  if (error) {
+    console.error("Lỗi thêm thành viên:", error);
+    alert("Không thêm được thành viên.");
+    return;
+  }
+
+  input.value = "";
+  await loadMembers();
+
+  alert("Đã thêm thành viên ✅");
+}
+
+document
+  .getElementById("addMemberBtn")
+  ?.addEventListener("click", addMember);
 async function handleSession(currentSession) {
   session = currentSession;
 
