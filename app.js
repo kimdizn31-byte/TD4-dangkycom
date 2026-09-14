@@ -662,21 +662,7 @@ async function nextWeek() {
 // EVENTS
 // ===============================
 
-$("summaryDate").addEventListener(
-  "change",
-  updateDailySummary
-);
 
-document
-  .querySelectorAll(".summary-item")
-  .forEach((button) => {
-    button.addEventListener("click", () => {
-      showSummaryPeople(
-        button.dataset.meal,
-        button.dataset.status
-      );
-    });
-  });
 $("googleLoginBtn")
   .addEventListener(
     "click",
