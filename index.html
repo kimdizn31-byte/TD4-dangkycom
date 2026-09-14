@@ -6,88 +6,220 @@
   <title>Đăng ký cơm</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+
 <header class="topbar">
-  <div class="brand"><span>🍚</span><div><strong>Đăng ký cơm</strong><small>Quản lý suất ăn mỗi ngày</small></div></div>
-  <div id="userBox" class="user-box hidden"><span id="userEmail"></span><button id="logoutBtn" class="ghost-btn">Đăng xuất</button></div>
+  <div class="brand">
+    <span>🍚</span>
+    <div>
+      <strong>Đăng ký cơm</strong>
+      <small>Quản lý suất ăn mỗi ngày</small>
+    </div>
+  </div>
+
+  <div id="userBox" class="user-box hidden">
+    <span id="userEmail"></span>
+    <button id="logoutBtn" class="ghost-btn">Đăng xuất</button>
+  </div>
 </header>
 
 <main class="container">
+
+  <!-- ĐĂNG NHẬP -->
   <section id="loginView" class="login-card">
     <div class="login-icon">🍚</div>
+
     <h1>Đăng ký cơm</h1>
-    <p>Đăng nhập bằng Google để đăng ký và quản lý suất cơm của bạn.</p>
-    <button id="googleLoginBtn" class="google-btn"><span>G</span> Đăng nhập bằng Google</button>
+
+    <p>
+      Đăng nhập bằng Google để đăng ký
+      và quản lý suất cơm của bạn.
+    </p>
+
+    <button id="googleLoginBtn" class="google-btn">
+      <span>G</span>
+      Đăng nhập bằng Google
+    </button>
+
     <p id="loginError" class="error"></p>
   </section>
 
+
+  <!-- ỨNG DỤNG -->
   <section id="appView" class="hidden">
+
     <div class="hero">
       <div>
-        <h1>Hôm nay ăn cơm thế nào?</h1>
-        <p>Đăng ký mới trước 08:00. Sau đó chỉ người đã đăng ký mới được đổi Đúng giờ / Ăn trễ trong khung quy định.</p>
+        <h1>Đăng ký cơm theo tuần</h1>
+
+        <p>
+          Chọn trạng thái cho từng buổi ăn.
+          Mỗi ô chỉ được chọn một trạng thái.
+        </p>
       </div>
+
       <div id="clockBox" class="clock-box"></div>
     </div>
 
+
     <div id="notice" class="notice"></div>
 
-    <div class="grid">
-      <section class="card">
-        <div class="card-title"><h2>Đăng ký / cập nhật</h2><span id="todayLabel"></span></div>
 
-        <label>Ngày ăn</label>
-        <input id="mealDate" type="date">
+    <!-- CHỌN TUẦN -->
+    <section class="card week-card">
 
-        <label>Buổi ăn</label>
-        <div class="choice-grid">
-          <button class="choice active" data-meal="Trưa">☀️ Trưa</button>
-          <button class="choice" data-meal="Tối">🌙 Tối</button>
+      <div class="week-nav">
+
+        <button id="prevWeekBtn" class="ghost-btn">
+          ← Tuần trước
+        </button>
+
+        <div class="week-title">
+          <small>Tuần đang chọn</small>
+          <strong id="weekLabel">--/-- - --/--</strong>
         </div>
 
-        <label>Trạng thái</label>
-        <div class="status-grid">
-          <button class="status-choice active" data-status="Đúng giờ">⏰ Đúng giờ</button>
-          <button class="status-choice" data-status="Ăn trễ">🕐 Ăn trễ</button>
-          <button class="status-choice" data-status="Không ăn">✕ Không ăn</button>
-        </div>
+        <button id="nextWeekBtn" class="ghost-btn">
+          Tuần sau →
+        </button>
 
-        <button id="registerBtn" class="primary-btn">+ Đăng ký</button>
-        <p id="formMessage" class="message"></p>
-      </section>
-
-      <section class="card">
-        <div class="card-title"><h2>Tổng kết</h2><span id="summaryDate"></span></div>
-        <div class="stats">
-          <div class="stat"><strong id="totalCount">0</strong><span>Tổng đăng ký</span></div>
-          <div class="stat"><strong id="onTimeCount">0</strong><span>Đúng giờ</span></div>
-          <div class="stat"><strong id="lateCount">0</strong><span>Ăn trễ</span></div>
-          <div class="stat"><strong id="noEatCount">0</strong><span>Không ăn</span></div>
-        </div>
-        <div class="meal-summary">
-          <div><span>☀️ Trưa</span><strong id="lunchCount">0</strong></div>
-          <div><span>🌙 Tối</span><strong id="dinnerCount">0</strong></div>
-        </div>
-      </section>
-    </div>
-
-    <section class="card">
-      <div class="card-title"><h2>Danh sách đăng ký</h2><button id="refreshBtn" class="ghost-btn">↻ Làm mới</button></div>
-      <div class="filters">
-        <input id="filterDate" type="date">
-        <select id="filterMeal"><option value="">Tất cả buổi</option><option value="Trưa">Trưa</option><option value="Tối">Tối</option></select>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Tên</th><th>Email</th><th>Ngày</th><th>Buổi</th><th>Trạng thái</th><th>Thời gian đăng ký</th></tr></thead>
-          <tbody id="registrationTable"><tr><td colspan="6" class="empty">Chưa có dữ liệu</td></tr></tbody>
-        </table>
+
+
+      <!-- BẢNG TUẦN -->
+      <div class="week-table">
+
+        <div class="week-head">
+          <div>Ngày</div>
+          <div>🌞 Trưa</div>
+          <div>🌙 Tối</div>
+        </div>
+
+        <div id="weekRows"></div>
+
       </div>
+
+
+      <p class="week-help">
+        ✓ Đúng giờ &nbsp;&nbsp;
+        ⏰ Ăn trễ &nbsp;&nbsp;
+        ✕ Không ăn
+      </p>
+
+
+      <button id="saveWeekBtn" class="primary-btn">
+        ✓ Lưu đăng ký tuần
+      </button>
+
+      <p id="formMessage" class="message"></p>
+
     </section>
+
+
+    <!-- TỔNG KẾT -->
+    <section class="card">
+
+      <div class="card-title">
+        <h2>Tổng kết tuần</h2>
+        <span id="summaryWeek"></span>
+      </div>
+
+      <div class="stats">
+
+        <div class="stat">
+          <strong id="totalCount">0</strong>
+          <span>Tổng đăng ký</span>
+        </div>
+
+        <div class="stat">
+          <strong id="onTimeCount">0</strong>
+          <span>Đúng giờ</span>
+        </div>
+
+        <div class="stat">
+          <strong id="lateCount">0</strong>
+          <span>Ăn trễ</span>
+        </div>
+
+        <div class="stat">
+          <strong id="noEatCount">0</strong>
+          <span>Không ăn</span>
+        </div>
+
+      </div>
+
+      <div class="meal-summary">
+
+        <div>
+          <span>🌞 Trưa</span>
+          <strong id="lunchCount">0</strong>
+        </div>
+
+        <div>
+          <span>🌙 Tối</span>
+          <strong id="dinnerCount">0</strong>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- DANH SÁCH -->
+    <section class="card">
+
+      <div class="card-title">
+
+        <div>
+          <h2>Danh sách đăng ký</h2>
+          <small id="listWeekLabel"></small>
+        </div>
+
+        <button id="refreshBtn" class="ghost-btn">
+          ↻ Làm mới
+        </button>
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Tên</th>
+              <th>Email</th>
+              <th>Ngày</th>
+              <th>Buổi</th>
+              <th>Trạng thái</th>
+            </tr>
+          </thead>
+
+          <tbody id="registrationTable">
+
+            <tr>
+              <td colspan="5" class="empty">
+                Chưa có dữ liệu
+              </td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
   </section>
+
 </main>
+
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="app.js"></script>
+
 </body>
 </html>
