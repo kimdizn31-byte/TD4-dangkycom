@@ -434,16 +434,7 @@ async function saveWeek() {
           r.meal_date === date &&
           r.meal === meal
       );
-    const permission = canRegister(date, meal, existing);
-
-if (!permission.allowed) {
-  errors.push(
-    `${displayDate(
-      new Date(date + "T00:00:00")
-    )} ${meal}: ${permission.message}`
-  );
-  continue;
-}
+  
 
     if (existing && existing.status === status) {
   continue;
