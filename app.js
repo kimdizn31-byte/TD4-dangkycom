@@ -997,7 +997,13 @@ async function updateMenuAdminControls() {
   }
 
   const controls = document.getElementById("menuAdminControls");
+const isAdmin = data?.is_admin === true;
 
+document
+  .querySelectorAll(".menu-input")
+  .forEach((input) => {
+    input.readOnly = !isAdmin;
+  });
   if (data?.is_admin === true) {
     controls?.classList.remove("hidden");
   } else {
