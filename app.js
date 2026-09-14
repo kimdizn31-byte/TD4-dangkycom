@@ -1212,4 +1212,19 @@ document
   ?.addEventListener("click", () => {
     changeMenuWeek(7);
   });
+async function changeSummaryWeek(days) {
+  summaryWeekStart = addDays(summaryWeekStart, days);
+  await loadWeeklySummaryData();
+}
 
+document
+  .getElementById("summaryPrevWeek")
+  ?.addEventListener("click", () => {
+    changeSummaryWeek(-7);
+  });
+
+document
+  .getElementById("summaryNextWeek")
+  ?.addEventListener("click", () => {
+    changeSummaryWeek(7);
+  });
