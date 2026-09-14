@@ -282,11 +282,10 @@ function mealCell(date, meal) {
       data-meal="${meal}"
     >
       <select name="${key}" class="meal-select">
-        <option value="">Chọn trạng thái</option>
-        <option value="Đúng giờ">✓ Đúng giờ</option>
-        <option value="Ăn trễ">⏰ Ăn trễ</option>
-        <option value="Không ăn">✕ Không ăn</option>
-      </select>
+  <option value="Không ăn" selected>✕ Không ăn</option>
+  <option value="Đúng giờ">✓ Đúng giờ</option>
+  <option value="Ăn trễ">⏰ Ăn trễ</option>
+</select>
     </div>
   `;
 }
@@ -403,6 +402,11 @@ if (!select || !select.value) {
           r.meal_date === date &&
           r.meal === meal
       );
+    // Mặc định Không ăn.
+// Nếu chưa từng đăng ký thì không cần tạo dữ liệu mới.
+if (!existing && status === "Không ăn") {
+  continue;
+}
   
 
     if (existing && existing.status === status) {
