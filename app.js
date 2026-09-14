@@ -820,9 +820,39 @@ supabaseClient.auth.onAuthStateChange(
 );
 // ===== ĐIỀU HƯỚNG TRANG =====
 let summaryWeekStart = new Date(currentWeekStart);
+async function loadWeeklySummaryData() {
+  const startDate = localDateString(summaryWeekStart);
+  const endDate = localDateString(addDays(summaryWeekStart, 6));
 
-function renderWeeklySummary() {
-  const container = document.getElementById("weeklySummaryRows");
+  const { data: members, error: membersError } =
+    await supabaseClient
+      .from("members")
+      .select("email, name, active")
+      .eq("active", true);
+
+  if (membersError) {
+    console.error("Lỗi tải thành viên:", membersError);
+    return;
+  }
+
+  const { data: registrations, error: regError } =
+    await supabaseClient
+      .from("meal_registrations")
+      .select("email, name, meal_date, meal, status")
+      .gte("meal_date", startDate)
+      .lte("meal_date", endDate);
+
+  if (regError) {
+    console.error("Lỗi tải đăng ký:", regError);
+    return;
+  }
+
+  renderWeeklySummary(members, registrations);
+}
+
+function renderWeeklySummary(members, registrations) {
+  const container =
+    document.getElementById("weeklySummaryRows");
 
   if (!container) return;
 
@@ -830,28 +860,89 @@ function renderWeeklySummary() {
 
   for (let i = 0; i < 7; i++) {
     const date = addDays(summaryWeekStart, i);
+    const dateStr = localDateString(date);
+
+    const getNotEating = (meal) => {
+      return members.filter((member) => {
+        const reg = registrations.find(
+          (r) =>
+            r.email.toLowerCase() ===
+              member.email.toLowerCase() &&
+            r.meal_date === dateStr &&
+            r.meal === meal
+        );
+
+        // Không có đăng ký = mặc định Không ăn
+        if (!reg) return true;
+
+        return reg.status === "Không ăn";
+      });
+    };
+
+    const morning = getNotEating("Trưa");
+    const afternoon = getNotEating("Tối");
+
+    const names = (people) =>
+      people
+        .map((person) => {
+          const reg = registrations.find(
+            (r) =>
+              r.email.toLowerCase() ===
+              person.email.toLowerCase()
+          );
+
+          return person.name || reg?.name || "Chưa có tên";
+        })
+        .map(
+          (name) =>
+            `<div class="summary-name">• ${escapeHtml(name)}</div>`
+        )
+        .join("");
 
     container.innerHTML += `
       <div class="summary-day">
-        <h3>${dayName(date)} - ${displayDate(date)}</h3>
+
+        <h3>
+          📅 ${dayName(date)} - ${displayDate(date)}
+        </h3>
 
         <div class="summary-meals">
+
           <div class="summary-meal-box">
             <strong>🌤️ Sáng</strong>
-            <div>Chưa tải dữ liệu</div>
+
+            <div>
+              🚫 Không ăn:
+              <b>${morning.length} người</b>
+            </div>
+
+            <div class="summary-name-list">
+              ${names(morning)}
+            </div>
           </div>
 
           <div class="summary-meal-box">
             <strong>🌇 Chiều</strong>
-            <div>Chưa tải dữ liệu</div>
+
+            <div>
+              🚫 Không ăn:
+              <b>${afternoon.length} người</b>
+            </div>
+
+            <div class="summary-name-list">
+              ${names(afternoon)}
+            </div>
           </div>
+
         </div>
       </div>
     `;
   }
 
   document.getElementById("summaryWeekLabel").textContent =
-    `${shortDate(summaryWeekStart)} - ${shortDate(addDays(summaryWeekStart, 6))}`;
+    `${shortDate(summaryWeekStart)} - ${
+      shortDate(addDays(summaryWeekStart, 6))
+    }`;
 }
 function openPage(page) {
   document.querySelectorAll(".app-page").forEach((el) => {
@@ -873,8 +964,8 @@ function openPage(page) {
   updateMenuAdminControls();
    loadMenuPool();
 }
-  if (page === "summary") {
-  renderWeeklySummary();
+ if (page === "summary") {
+  loadWeeklySummaryData();
 }
   const activeBtn = document.querySelector(
     `.nav-btn[data-page="${page}"]`
