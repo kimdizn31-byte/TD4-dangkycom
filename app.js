@@ -231,7 +231,7 @@ function updateWeekLabels() {
     `${shortDate(currentWeekStart)} - ${shortDate(end)}`;
 
   $("weekLabel").textContent = text;
-  $("listWeekLabel").textContent = text;
+ 
 }
 
 // ===============================
@@ -332,7 +332,7 @@ async function loadWeek() {
 
   renderWeekRows();
   renderSummary();
-  renderRegistrationList();
+ 
 
   $("notice").textContent =
     "Chọn trạng thái cho từng buổi rồi bấm Lưu đăng ký tuần.";
@@ -629,58 +629,7 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-function renderRegistrationList() {
-  const body =
-    $("registrationTable");
 
-  if (!weekRowsData.length) {
-    body.innerHTML = `
-      <tr>
-        <td
-          colspan="5"
-          class="empty"
-        >
-          Chưa có dữ liệu
-        </td>
-      </tr>
-    `;
-
-    return;
-  }
-
-  body.innerHTML =
-    weekRowsData
-      .map((row) => {
-        return `
-          <tr>
-            <td>
-              ${escapeHtml(row.name)}
-            </td>
-
-            <td>
-              ${escapeHtml(row.email)}
-            </td>
-
-            <td>
-              ${escapeHtml(row.meal_date)}
-            </td>
-
-            <td>
-              ${row.meal === "Trưa"
-                ? "🌞 Trưa"
-                : "🌙 Tối"}
-            </td>
-
-            <td>
-              <span class="badge">
-                ${escapeHtml(row.status)}
-              </span>
-            </td>
-          </tr>
-        `;
-      })
-      .join("");
-}
 
 // ===============================
 // WEEK NAVIGATION
@@ -749,11 +698,7 @@ $("saveWeekBtn")
     saveWeek
   );
 
-$("refreshBtn")
-  .addEventListener(
-    "click",
-    loadWeek
-  );
+
 
 // ===============================
 // AUTH START
