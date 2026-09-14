@@ -833,6 +833,9 @@ function openPage(page) {
   if (target) {
     target.classList.remove("hidden");
   }
+  if (page === "menu") {
+  renderWeeklyMenu();
+}
 
   const activeBtn = document.querySelector(
     `.nav-btn[data-page="${page}"]`
@@ -848,3 +851,45 @@ document.querySelectorAll(".nav-btn").forEach((btn) => {
     openPage(btn.dataset.page);
   });
 });
+function renderWeeklyMenu() {
+  const container = document.getElementById("weeklyMenuRows");
+
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  for (let i = 0; i < 7; i++) {
+    const date = addDays(currentWeekStart, i);
+    const dateStr = localDateString(date);
+
+    container.innerHTML += `
+      <div class="menu-row">
+        <div class="menu-date">
+          <strong>${dayName(date)}</strong>
+          <span>${displayDate(date)}</span>
+        </div>
+
+        <div>
+          <input
+            class="menu-input"
+            data-date="${dateStr}"
+            data-meal="Trưa"
+            placeholder="Nhập món sáng"
+          >
+        </div>
+
+        <div>
+          <input
+            class="menu-input"
+            data-date="${dateStr}"
+            data-meal="Tối"
+            placeholder="Nhập món chiều"
+          >
+        </div>
+      </div>
+    `;
+  }
+
+  document.getElementById("menuWeekLabel").textContent =
+    `${shortDate(currentWeekStart)} - ${shortDate(weekEnd())}`;
+}
