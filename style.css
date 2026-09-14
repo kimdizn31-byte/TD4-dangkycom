@@ -801,3 +801,211 @@ th{
     padding: 10px 5px;
   }
 }
+/* ===== MOBILE UX OPTIMIZATION ===== */
+
+@media (max-width: 600px) {
+
+  /* Nút dễ bấm bằng ngón tay */
+  button,
+  select {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  /* Nội dung không sát mép màn hình */
+  body {
+    overflow-x: hidden;
+  }
+
+  .card {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  /* Điều khiển tuần */
+  .week-controls {
+    gap: 6px;
+  }
+
+  .week-controls button {
+    min-width: 0;
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+
+  .week-controls strong {
+    text-align: center;
+    font-size: 13px;
+  }
+
+  /* Dropdown đăng ký cơm */
+  .meal-select {
+    min-height: 46px;
+    font-size: 13px;
+    padding: 8px 4px;
+  }
+}
+/* ===== MOBILE NAVIGATION ===== */
+
+@media (max-width: 600px) {
+
+  .main-nav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+
+    padding: 6px;
+    overflow: visible;
+    position: sticky;
+    top: 6px;
+    z-index: 100;
+
+    background: #111;
+    border-radius: 12px;
+  }
+
+  .nav-btn {
+    min-width: 0;
+    width: 100%;
+
+    padding: 9px 3px;
+    min-height: 48px;
+
+    font-size: 11px;
+    line-height: 1.25;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .nav-btn.active {
+    font-weight: 800;
+  }
+}
+/* ===== MOBILE MEAL REGISTRATION ===== */
+
+@media (max-width: 600px) {
+
+  .week-head,
+  .week-row {
+    grid-template-columns: 0.9fr 1.05fr 1.05fr !important;
+    gap: 5px;
+  }
+
+  .week-row {
+    padding: 9px 0;
+  }
+
+  .week-date-cell {
+    min-width: 0;
+    gap: 2px;
+  }
+
+  .week-date-cell strong {
+    font-size: 12px;
+  }
+
+  .week-date-cell span {
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .meal-cell {
+    min-width: 0;
+  }
+
+  .meal-select {
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+
+    padding: 6px 2px;
+    border-radius: 9px;
+
+    font-size: 12px;
+    text-align: center;
+  }
+
+  .week-head {
+    font-size: 12px;
+    position: sticky;
+    top: 67px;
+    z-index: 50;
+
+    padding: 8px 0;
+    background: #111;
+  }
+}
+/* ===== MOBILE MENU + EATING SUMMARY ===== */
+
+@media (max-width: 600px) {
+
+  /* Menu món ăn */
+  .menu-table {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .menu-row {
+    grid-template-columns: 0.8fr 1.1fr 1.1fr;
+    gap: 5px;
+  }
+
+  .menu-input {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 7px 5px;
+    font-size: 12px;
+    border-radius: 9px;
+  }
+
+  /* Kho món của Admin */
+  .menu-pool-box textarea {
+    width: 100%;
+    min-height: 160px;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+
+  #saveMenuPoolBtn,
+  #randomMenuBtn {
+    width: 100%;
+    min-height: 46px;
+    margin-top: 8px;
+  }
+
+  /* Ô số người ăn */
+  .eating-day-card {
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+
+  .eating-day-title {
+    align-items: center;
+    margin-bottom: 9px;
+  }
+
+  .eating-meals {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .eating-count-btn {
+    min-height: 54px;
+    padding: 8px 4px;
+    font-size: 12px;
+  }
+
+  .eating-count-btn strong {
+    font-size: 15px;
+  }
+
+  .eating-names {
+    padding: 10px;
+  }
+
+  .eating-person {
+    font-size: 14px;
+    padding: 8px 0;
+  }
+}
