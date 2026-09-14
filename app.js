@@ -460,6 +460,105 @@ document
   ?.addEventListener("change", (event) => {
     loadDailyStats(event.target.value);
   });
+async function loadDailyStats(date) {
+  if (!date) return;
+
+  const title = document.getElementById("dailyStatsTitle");
+
+  const [year, month, day] = date.split("-");
+
+  if (title) {
+    title.textContent =
+      `📊 Thống kê ngày ${day}/${month}/${year}`;
+  }
+
+  const { data: members, error: membersError } =
+    await supabaseClient
+      .from("members")
+      .select("id")
+      .eq("active", true);
+
+  if (membersError) {
+    console.error("Lỗi tải thành viên:", membersError);
+    return;
+  }
+
+  const { data: registrations, error } =
+    await supabaseClient
+      .from("meal_registrations")
+      .select("user_id, meal, status")
+      .eq("meal_date", date);
+
+  if (error) {
+    console.error("Lỗi tải thống kê ngày:", error);
+    return;
+  }
+
+  const rows = registrations || [];
+  const totalMembers = (members || []).length;
+
+  const count = (meal, status) =>
+    rows.filter(
+      (row) =>
+        row.meal === meal &&
+        row.status === status
+    ).length;
+
+  const morningOnTime = count("Trưa", "Đúng giờ");
+  const morningLate = count("Trưa", "Ăn trễ");
+
+  const afternoonOnTime = count("Tối", "Đúng giờ");
+  const afternoonLate = count("Tối", "Ăn trễ");
+
+  // Ai không chọn Đúng giờ/Ăn trễ được tính là Không ăn
+  const morningNoEat = Math.max(
+    0,
+    totalMembers - morningOnTime - morningLate
+  );
+
+  const afternoonNoEat = Math.max(
+    0,
+    totalMembers - afternoonOnTime - afternoonLate
+  );
+
+  document.getElementById("dailyMorningOnTime").textContent =
+    morningOnTime;
+
+  document.getElementById("dailyMorningLate").textContent =
+    morningLate;
+
+  document.getElementById("dailyMorningNoEat").textContent =
+    morningNoEat;
+
+  document.getElementById("dailyAfternoonOnTime").textContent =
+    afternoonOnTime;
+
+  document.getElementById("dailyAfternoonLate").textContent =
+    afternoonLate;
+
+  document.getElementById("dailyAfternoonNoEat").textContent =
+    afternoonNoEat;
+}
+
+
+function setupDailyStats() {
+  const input = document.getElementById("dailyStatsDate");
+
+  if (!input) return;
+
+  if (!input.value) {
+    input.value = todayString();
+  }
+
+  loadDailyStats(input.value);
+}
+
+
+document
+  .getElementById("dailyStatsDate")
+  ?.addEventListener("change", (event) => {
+    loadDailyStats(event.target.value);
+  });
 function showEatingNames(date, meal) {
   const box = document.getElementById(`eatingNames-${date}`);
 
