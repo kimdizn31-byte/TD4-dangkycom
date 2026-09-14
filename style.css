@@ -461,3 +461,59 @@ th{
     padding:16px;
   }
 }
+/* ===== BẢNG ĐĂNG KÝ 3 CỘT ===== */
+
+.week-head,
+.week-row {
+  display: grid !important;
+  grid-template-columns: 1.2fr 1fr 1fr !important;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+}
+
+.week-head {
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.week-row {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.week-date-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meal-cell {
+  width: 100%;
+  min-width: 0;
+}
+
+.meal-select {
+  width: 100%;
+  padding: 10px 6px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+@media (max-width: 600px) {
+  .week-head,
+  .week-row {
+    grid-template-columns: 1.1fr 1fr 1fr !important;
+    gap: 5px;
+  }
+
+  .meal-select {
+    font-size: 12px;
+    padding: 8px 3px;
+  }
+
+  .week-date-cell {
+    font-size: 12px;
+  }
+}
