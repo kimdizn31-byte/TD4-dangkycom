@@ -230,7 +230,6 @@ function updateWeekLabels() {
     `${shortDate(currentWeekStart)} - ${shortDate(end)}`;
 
   $("weekLabel").textContent = text;
-  $("summaryWeek").textContent = text;
   $("listWeekLabel").textContent = text;
 }
 
@@ -291,7 +290,6 @@ function mealCell(date, meal) {
     </div>
   `;
 }
-
 // ===============================
 // LOAD WEEK
 // ===============================
