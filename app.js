@@ -989,7 +989,9 @@ async function randomWeeklyMenu() {
     return;
   }
 
-  const dishes = data.map((row) => row.dish_name);
+  const dishes = data
+    .map((row) => row.dish_name)
+    .filter((dish) => dish);
 
   if (dishes.length === 0) {
     alert("Kho món đang trống.");
@@ -1008,47 +1010,33 @@ async function randomWeeklyMenu() {
     ...document.querySelectorAll(".menu-input")
   ];
 
-  inputs.forEach((input, index) => {
-    input.value = dishes[index % dishes.length];
-  });
-}
-document
-  .getElementById("randomMenuBtn")
-  ?.addEventListener("click", randomWeeklyMenu);
-async function saveWeeklyMenu() {
-  const inputs = document.querySelectorAll(".menu-input");
   const rows = [];
 
-  inputs.forEach((input) => {
-    const dishName = input.value.trim();
+  inputs.forEach((input, index) => {
+    const dish = dishes[index % dishes.length];
 
-    if (!dishName) return;
+    input.value = dish;
 
     rows.push({
       meal_date: input.dataset.date,
       meal: input.dataset.meal,
-      dish_name: dishName
+      dish_name: dish
     });
   });
 
-  if (rows.length === 0) {
-    alert("Bạn chưa nhập món ăn.");
-    return;
-  }
-
-  const { error } = await supabaseClient
+  const { error: saveError } = await supabaseClient
     .from("weekly_menu")
     .upsert(rows, {
       onConflict: "meal_date,meal"
     });
 
-  if (error) {
-    console.error("Lỗi lưu thực đơn:", error);
-    alert("Không lưu được thực đơn.");
+  if (saveError) {
+    console.error("Lỗi lưu thực đơn Random:", saveError);
+    alert("Random được nhưng không lưu được.");
     return;
   }
 
-  alert("Đã lưu thực đơn ✅");
+  alert("Đã Random và lưu thực đơn tuần ✅");
 }
 
 document
