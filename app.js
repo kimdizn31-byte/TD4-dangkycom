@@ -27,14 +27,14 @@ function updateNotice(){
 }
 async function login(){
   $("loginError").textContent="";
-  const {error}=awaitsupabaseClient.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin+location.pathname}});
+ const {error}=await supabaseClient.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin+location.pathname}});
   if(error)$("loginError").textContent=error.message;
 }
 async function logout(){await supabaseClient.auth.signOut();location.reload()}
 
 async function loadRows(){
   const date=$("filterDate").value||localDate(),meal=$("filterMeal").value;
-  let q=supabase.from("meal_registrations").select("*").eq("meal_date",date).order("created_at",{ascending:true});
+ let q=supabaseClient.from("meal_registrations")
   if(meal)q=q.eq("meal",meal);
   const {data,error}=await q;
   if(error){$("registrationTable").innerHTML=`<tr><td colspan="6" class="empty">${escapeHtml(error.message)}</td></tr>`;return}
@@ -65,7 +65,7 @@ async function registerOrUpdate(){
   if(!date){$("formMessage").textContent="Hãy chọn ngày ăn.";return}
   if(date<localDate()){$("formMessage").textContent="Không thể đăng ký ngày đã qua.";return}
 
-  const {data:existing,error:findError}=await supabase.from("meal_registrations")
+ const {data:existing,error:findError}=await supabaseClient.from("meal_registrations")
     .select("id,status").eq("user_id",session.user.id).eq("meal_date",date).eq("meal",selectedMeal).maybeSingle();
   if(findError){$("formMessage").textContent=findError.message;return}
 
@@ -77,13 +77,13 @@ async function registerOrUpdate(){
       $("formMessage").textContent=`Đã quá giờ đổi trạng thái (${selectedMeal==="Trưa"?"10:30":"17:30"}).`;
       return;
     }
-    const {error}=await supabase.from("meal_registrations").update({status:selectedStatus}).eq("id",existing.id);
+    const {error}=await supabaseClient.from("meal_registrations").update({status:selectedStatus}).eq("id",existing.id);
     $("formMessage").textContent=error?error.message:"Đã cập nhật trạng thái.";
     loadRows();return;
   }
 
   const name=session.user.user_metadata?.full_name||session.user.user_metadata?.name||session.user.email?.split("@")[0]||"Người dùng";
-  const {error}=await supabase.from("meal_registrations").insert({
+  const {error}=await supabaseClient.from("meal_registrations").insert({
     user_id:session.user.id,email:session.user.email,name,meal_date:date,meal:selectedMeal,status:selectedStatus
   });
   $("formMessage").textContent=error?error.message:"Đăng ký thành công!";
@@ -102,5 +102,12 @@ $("filterDate").addEventListener("change",()=>{updateClock();loadRows()});
 $("filterMeal").addEventListener("change",loadRows);
 $("mealDate").addEventListener("change",updateNotice);
 
-supabase.auth.getSession().then(({data})=>{session=data.session;if(session)showApp()});
-supabase.auth.onAuthStateChange((_event,newSession)=>{session=newSession;if(session)showApp()});
+supabaseClient.auth.getSession().then(({data})=>{
+  session=data.session;
+  if(session) showApp();
+});
+
+supabaseClient.auth.onAuthStateChange((_event,newSession)=>{
+  session=newSession;
+  if(session) showApp();
+});
