@@ -1443,11 +1443,14 @@ async function loadMenuPool() {
 async function saveMenuPool() {
   const input = document.getElementById("menuPoolInput");
 
-  const dishes = input.value
-    .split("\n")
-    .map((dish) => dish.trim())
-    .filter((dish) => dish !== "");
-
+  const dishes = [
+  ...new Set(
+    input.value
+      .split("\n")
+      .map((dish) => dish.trim())
+      .filter((dish) => dish !== "")
+  )
+];
   // Tắt toàn bộ món cũ trước
   const { error: disableError } = await supabaseClient
     .from("menu_pool")
