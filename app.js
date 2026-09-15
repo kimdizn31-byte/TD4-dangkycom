@@ -1480,11 +1480,18 @@ async function saveMenuPool() {
       onConflict: "dish_name"
     });
 
-  if (error) {
-    console.error("Lỗi lưu kho món:", error);
-    alert("Không lưu được kho món.");
-    return;
-  }
+ if (error) {
+  console.error("Lỗi lưu kho món:", error);
+
+  alert(
+    "Lỗi lưu kho món:\n" +
+    "Code: " + (error.code || "không có") + "\n" +
+    "Message: " + (error.message || "không có") + "\n" +
+    "Details: " + (error.details || "không có")
+  );
+
+  return;
+}
 
   alert("Đã lưu kho món ✅");
   await loadMenuPool();
