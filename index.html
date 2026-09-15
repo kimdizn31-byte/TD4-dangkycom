@@ -170,20 +170,32 @@
 
     <div class="daily-stat-grid">
 
-      <div class="daily-stat-item stat-ontime">
-        <span>Đúng giờ</span>
-        <strong id="dailyMorningOnTime">0</strong>
-      </div>
+     <div
+  class="daily-stat-item stat-ontime"
+  data-meal="Trưa"
+  data-status="Đúng giờ"
+>
+  <span>Đúng giờ</span>
+  <strong id="dailyMorningOnTime">0</strong>
+</div>
 
-      <div class="daily-stat-item stat-late">
-        <span>Ăn trễ</span>
-        <strong id="dailyMorningLate">0</strong>
-      </div>
+     <div
+  class="daily-stat-item stat-late"
+  data-meal="Trưa"
+  data-status="Ăn trễ"
+>
+  <span>Ăn trễ</span>
+  <strong id="dailyMorningLate">0</strong>
+</div>
 
-      <div class="daily-stat-item stat-noeat">
-        <span>Không ăn</span>
-        <strong id="dailyMorningNoEat">0</strong>
-      </div>
+      <div
+  class="daily-stat-item stat-noeat"
+  data-meal="Trưa"
+  data-status="Không ăn"
+>
+  <span>Không ăn</span>
+  <strong id="dailyMorningNoEat">0</strong>
+</div>
 
     </div>
   </div>
@@ -193,34 +205,43 @@
 
     <div class="daily-stat-grid">
 
-      <div class="daily-stat-item stat-ontime">
-        <span>Đúng giờ</span>
-        <strong id="dailyAfternoonOnTime">0</strong>
-      </div>
+    <div
+  class="daily-stat-item stat-ontime"
+  data-meal="Tối"
+  data-status="Đúng giờ"
+>
+  <span>Đúng giờ</span>
+  <strong id="dailyAfternoonOnTime">0</strong>
+</div>
 
-      <div class="daily-stat-item stat-late">
-        <span>Ăn trễ</span>
-        <strong id="dailyAfternoonLate">0</strong>
-      </div>
+<div
+  class="daily-stat-item stat-late"
+  data-meal="Tối"
+  data-status="Ăn trễ"
+>
+  <span>Ăn trễ</span>
+  <strong id="dailyAfternoonLate">0</strong>
+</div>
 
-      <div class="daily-stat-item stat-noeat">
-        <span>Không ăn</span>
-        <strong id="dailyAfternoonNoEat">0</strong>
-      </div>
-
+<div
+  class="daily-stat-item stat-noeat"
+  data-meal="Tối"
+  data-status="Không ăn"
+>
+  <span>Không ăn</span>
+  <strong id="dailyAfternoonNoEat">0</strong>
+</div>
     </div>
   </div>
 
   <div class="daily-stats-note">
     ℹ️ Số liệu sẽ thay đổi theo ngày bạn chọn ở trên.
   </div>
+  <div id="dailyPeopleDetails" class="daily-people-details hidden"></div>
 
 </section>
 
-<div id="eatingPeopleList" class="eating-people-list">
-  <h3>👥 Người ăn trong tuần</h3>
-  <p>Đang tải dữ liệu...</p>
-</div>
+
 
   
     </div>
