@@ -1443,7 +1443,7 @@ async function loadMenuPool() {
 async function saveMenuPool() {
   const input = document.getElementById("menuPoolInput");
 
-  const dishes = [
+const dishes = [
   ...new Set(
     input.value
       .split("\n")
