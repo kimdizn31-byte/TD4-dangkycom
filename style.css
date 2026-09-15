@@ -1139,3 +1139,70 @@ th{
     padding: 12px;
   }
 }
+/* ===== DANH SÁCH NGƯỜI TRONG THỐNG KÊ NGÀY ===== */
+
+.daily-stat-item {
+  cursor: pointer;
+}
+
+.daily-stat-item:hover {
+  transform: translateY(-2px);
+}
+
+.daily-people-details {
+  margin-top: 16px;
+  padding: 16px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 14px;
+}
+
+.daily-people-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.daily-people-title strong {
+  font-size: 17px;
+}
+
+.daily-people-title span {
+  color: #aaa;
+  font-size: 13px;
+}
+
+.daily-person-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.daily-person-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #181818;
+  border: 1px solid #2c2c2c;
+  border-radius: 10px;
+}
+
+.daily-person-row span {
+  color: #888;
+  min-width: 22px;
+}
+
+.daily-person-empty {
+  color: #aaa;
+  padding: 8px 0;
+}
+
+@media (max-width: 600px) {
+  .daily-people-title {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
