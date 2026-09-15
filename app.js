@@ -671,7 +671,7 @@ async function loadWeek() {
     );
 
   renderWeekRows();
-  renderEatingPeople();
+ 
  setupDailyStats();
 
   $("notice").textContent =
@@ -1616,3 +1616,116 @@ document
   ?.addEventListener("click", () => {
     changeSummaryWeek(7);
   });
+// =====================================
+// XEM DANH SÁCH NGƯỜI THEO THỐNG KÊ NGÀY
+// =====================================
+
+async function showDailyPeople(meal, status) {
+  const dateInput = document.getElementById("dailyStatsDate");
+  const box = document.getElementById("dailyPeopleDetails");
+
+  if (!dateInput || !box) return;
+
+  const date = dateInput.value;
+
+  // Lấy danh sách thành viên
+  const { data: members, error: membersError } =
+    await supabaseClient
+      .from("members")
+      .select("id, email, name")
+      .eq("active", true);
+
+  if (membersError) {
+    console.error("Lỗi tải thành viên:", membersError);
+    return;
+  }
+
+  // Lấy đăng ký của ngày + buổi đang chọn
+  const { data: registrations, error: registrationsError } =
+    await supabaseClient
+      .from("meal_registrations")
+      .select("user_id, email, name, meal, status")
+      .eq("meal_date", date)
+      .eq("meal", meal);
+
+  if (registrationsError) {
+    console.error("Lỗi tải đăng ký:", registrationsError);
+    return;
+  }
+
+  const rows = registrations || [];
+  let people = [];
+
+  // KHÔNG ĂN
+  if (status === "Không ăn") {
+    people = (members || []).filter((member) => {
+      const registration = rows.find((row) =>
+        row.email?.toLowerCase() === member.email?.toLowerCase()
+      );
+
+      return !registration || registration.status === "Không ăn";
+    });
+  }
+
+  // ĐÚNG GIỜ / ĂN TRỄ
+  else {
+    people = rows
+      .filter((row) => row.status === status)
+      .map((row) => ({
+        name: row.name || row.email || "Chưa có tên"
+      }));
+  }
+
+  const mealName =
+    meal === "Trưa" ? "🌤️ Sáng" : "🌇 Chiều";
+
+  const [year, month, day] = date.split("-");
+
+  let html = `
+    <div class="daily-people-title">
+      <strong>${mealName} · ${escapeHtml(status)}</strong>
+      <span>${day}/${month}/${year}</span>
+    </div>
+  `;
+
+  if (people.length === 0) {
+    html += `
+      <div class="daily-person-empty">
+        Không có ai.
+      </div>
+    `;
+  } else {
+    html += `
+      <div class="daily-person-list">
+        ${people.map((person, index) => `
+          <div class="daily-person-row">
+            <span>${index + 1}.</span>
+            <strong>
+              ${escapeHtml(
+                person.name ||
+                person.email ||
+                "Chưa có tên"
+              )}
+            </strong>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  box.innerHTML = html;
+  box.classList.remove("hidden");
+}
+
+
+// BẤM VÀO 6 Ô THỐNG KÊ
+document.addEventListener("click", (event) => {
+  const item = event.target.closest(".daily-stat-item");
+
+  if (!item) return;
+
+  showDailyPeople(
+    item.dataset.meal,
+    item.dataset.status
+  );
+});
