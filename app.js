@@ -1162,6 +1162,122 @@ async function addMember() {
 document
   .getElementById("addMemberBtn")
   ?.addEventListener("click", addMember);
+// ===============================
+// BÁO VẮNG
+// ===============================
+
+async function sendAbsenceReport() {
+  const dateInput = document.getElementById("absenceDate");
+  const reasonInput = document.getElementById("absenceReason");
+  const message = document.getElementById("absenceMessage");
+
+  const absenceDate = dateInput?.value;
+  const reason = reasonInput?.value.trim();
+
+  if (!absenceDate) {
+    message.textContent = "Vui lòng chọn ngày vắng.";
+    return;
+  }
+
+  if (!reason) {
+    message.textContent = "Vui lòng nhập lý do.";
+    return;
+  }
+
+  if (!session?.user) {
+    message.textContent = "Bạn chưa đăng nhập.";
+    return;
+  }
+
+  message.textContent = "Đang gửi...";
+
+  const user = session.user;
+
+  const name =
+    user.user_metadata?.full_name ||
+    user.user_metadata?.name ||
+    user.email;
+
+  const { error } = await supabaseClient
+    .from("absence_reports")
+    .insert({
+      user_id: user.id,
+      email: user.email,
+      name: name,
+      absence_date: absenceDate,
+      reason: reason
+    });
+
+  if (error) {
+    console.error("Lỗi gửi báo vắng:", error);
+    message.textContent = "Không gửi được báo vắng.";
+    return;
+  }
+
+  reasonInput.value = "";
+
+  message.textContent = "✓ Đã gửi báo vắng thành công.";
+  await loadAbsenceHistory();
+}
+async function loadAbsenceHistory() {
+  const historyCard =
+    document.getElementById("absenceHistoryCard");
+
+  const historyBox =
+    document.getElementById("absenceHistory");
+
+  if (!historyCard || !historyBox) return;
+
+  const { data: adminData, error: adminError } =
+    await supabaseClient.rpc("is_admin_member");
+
+  if (adminError || !adminData) {
+    historyCard.classList.add("hidden");
+    return;
+  }
+
+  historyCard.classList.remove("hidden");
+
+  historyBox.innerHTML = "<p>Đang tải...</p>";
+
+  const { data, error } = await supabaseClient
+    .from("absence_reports")
+    .select("id, name, email, absence_date, reason, created_at")
+    .order("absence_date", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Lỗi tải lịch sử báo vắng:", error);
+    historyBox.innerHTML =
+      "<p>Không tải được lịch sử báo vắng.</p>";
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    historyBox.innerHTML =
+      "<p>Chưa có ai báo vắng.</p>";
+    return;
+  }
+
+  historyBox.innerHTML = data
+    .map((row) => `
+      <div class="absence-history-item">
+        <strong>${escapeHtml(row.name || "Chưa có tên")}</strong>
+
+        <div>
+          📅 ${escapeHtml(row.absence_date)}
+        </div>
+
+        <div>
+          📝 ${escapeHtml(row.reason)}
+        </div>
+      </div>
+    `)
+    .join("");
+}
+document
+  .getElementById("sendAbsenceBtn")
+  ?.addEventListener("click", sendAbsenceReport);
 async function handleSession(currentSession) {
   session = currentSession;
 
@@ -1356,6 +1472,15 @@ if (homePage) {
 }
  if (page === "summary") {
   loadWeeklySummaryData();
+}
+  if (page === "absence") {
+  const absenceDate =
+    document.getElementById("absenceDate");
+
+  if (absenceDate && !absenceDate.value) {
+    absenceDate.value = todayString();
+  }
+    loadAbsenceHistory();
 }
   if (page === "members") {
   loadMembers();
