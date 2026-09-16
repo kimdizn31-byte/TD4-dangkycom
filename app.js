@@ -965,25 +965,41 @@ async function checkMemberAccess(user) {
   return !!data;
 }
 async function updateMemberNameFromGoogle(user) {
-  const email = user?.email;
+  if (!user?.email) return;
 
-  const fullName =
-    user?.user_metadata?.full_name ||
-    user?.user_metadata?.name ||
+  const email = user.email.toLowerCase();
+
+  const googleName =
+    user.user_metadata?.full_name ||
+    user.user_metadata?.name ||
+    user.user_metadata?.display_name ||
     "";
 
-  if (!email || !fullName) return;
+  console.log("Tên Google:", googleName);
+  console.log("Email:", email);
 
-  const { error } = await supabaseClient
+  if (!googleName) {
+    console.log("Google không trả về tên.");
+    return;
+  }
+
+  const { data, error } = await supabaseClient
     .from("members")
     .update({
-      name: fullName
+      name: googleName
     })
-    .eq("email", email.toLowerCase());
+    .eq("email", email)
+    .select();
 
   if (error) {
-    console.error("Lỗi cập nhật tên thành viên:", error);
+    console.error(
+      "Lỗi lưu tên Google vào members:",
+      error
+    );
+    return;
   }
+
+  console.log("Đã cập nhật tên:", data);
 }
 async function updateAdminAccess() {
   if (!session?.user?.email) return;
@@ -1289,7 +1305,6 @@ async function handleSession(currentSession) {
   }
 
   const allowed = await checkMemberAccess(session.user);
-  await updateMemberNameFromGoogle(session.user);
 
   if (!allowed) {
     await supabaseClient.auth.signOut();
@@ -1301,6 +1316,8 @@ async function handleSession(currentSession) {
     alert("Tài khoản này không thuộc danh sách thành viên.");
     return;
   }
+  await updateMemberNameFromGoogle(session.user);
+
 
  await showApp();
 await updateAdminAccess();
