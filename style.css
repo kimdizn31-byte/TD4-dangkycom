@@ -1606,3 +1606,19 @@ body {
   color: #8b2020;
   border-color: #e36565;
 }
+/* ===== MÀU TỪNG LỰA CHỌN TRONG DROPDOWN ===== */
+
+.meal-select option[value="Đúng giờ"] {
+  background: #c8f3d4;
+  color: #145c2e;
+}
+
+.meal-select option[value="Ăn trễ"] {
+  background: #fff0b8;
+  color: #795600;
+}
+
+.meal-select option[value="Không ăn"] {
+  background: #ffd0d0;
+  color: #8b2020;
+}
