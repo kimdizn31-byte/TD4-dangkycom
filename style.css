@@ -1206,3 +1206,373 @@ th{
     align-items: flex-start;
   }
 }
+/* ===== NEW HOME DASHBOARD ===== */
+
+:root {
+  --bg-main: #18211f;
+  --bg-card: #202c29;
+  --bg-card-hover: #293834;
+
+  --border-soft: #344640;
+
+  --accent: #8fb7a8;
+  --accent-dark: #70998a;
+
+  --text-main: #eef4f1;
+  --text-soft: #aebdb7;
+}
+
+/* Nền web dịu mắt hơn */
+html,
+body {
+  background: var(--bg-main);
+  color: var(--text-main);
+}
+
+/* Card chung */
+.card,
+.hero {
+  background: var(--bg-card);
+  border-color: var(--border-soft);
+}
+
+/* ===== TRANG CHỦ ===== */
+
+.home-page {
+  width: min(440px, 100%);
+  margin: 0 auto;
+
+  min-height: calc(100dvh - 110px);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  padding: 12px 0 20px;
+}
+
+.home-header {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.home-logo {
+  width: 64px;
+  height: 64px;
+
+  margin: 0 auto 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 32px;
+
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 20px;
+}
+
+.home-header h1 {
+  margin: 0;
+  font-size: 25px;
+}
+
+.home-header p {
+  margin: 6px 0 0;
+  color: var(--text-soft);
+  font-size: 14px;
+}
+
+/* Các ô chức năng */
+
+.home-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.home-menu-btn {
+  width: 100%;
+  min-height: 68px;
+
+  display: grid;
+  grid-template-columns: 48px 1fr 24px;
+  align-items: center;
+
+  padding: 10px 16px;
+
+  background: var(--bg-card);
+  color: var(--text-main);
+
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+
+  cursor: pointer;
+  text-align: left;
+
+  transition: 0.15s ease;
+}
+
+.home-menu-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--accent-dark);
+}
+
+.home-menu-btn:active {
+  transform: scale(0.98);
+}
+
+.home-menu-icon {
+  font-size: 25px;
+}
+
+.home-menu-btn strong {
+  font-size: 16px;
+}
+
+.home-menu-arrow {
+  color: var(--accent);
+  font-size: 28px;
+  text-align: right;
+}
+
+/* Nút quay về Trang chủ */
+
+.back-home-btn {
+  min-height: 42px;
+  margin-bottom: 12px;
+  padding: 9px 14px;
+
+  background: var(--bg-card);
+  color: var(--text-main);
+
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ===== ĐIỆN THOẠI ===== */
+
+@media (max-width: 600px) {
+
+  .container {
+    width: calc(100% - 24px);
+    margin: 12px auto;
+  }
+
+  .home-page {
+    min-height: calc(100dvh - 95px);
+    padding: 5px 0 15px;
+  }
+
+  .home-header {
+    margin-bottom: 17px;
+  }
+
+  .home-logo {
+    width: 56px;
+    height: 56px;
+    font-size: 28px;
+    border-radius: 17px;
+  }
+
+  .home-header h1 {
+    font-size: 22px;
+  }
+
+  .home-menu {
+    gap: 9px;
+  }
+
+  .home-menu-btn {
+    min-height: 62px;
+    border-radius: 14px;
+    padding: 8px 14px;
+  }
+
+  .home-menu-icon {
+    font-size: 22px;
+  }
+
+  .home-menu-btn strong {
+    font-size: 15px;
+  }
+}
+
+/* Điện thoại thấp */
+@media (max-height: 650px) and (max-width: 600px) {
+
+  .home-page {
+    justify-content: flex-start;
+  }
+
+  .home-header {
+    margin-bottom: 10px;
+  }
+
+  .home-logo {
+    width: 46px;
+    height: 46px;
+    font-size: 23px;
+    margin-bottom: 6px;
+  }
+
+  .home-header p {
+    margin-top: 3px;
+  }
+
+  .home-menu {
+    gap: 7px;
+  }
+
+  .home-menu-btn {
+    min-height: 54px;
+  }
+}
+/* ===== HOME DASHBOARD ===== */
+
+.home-page {
+  width: min(520px, 100%);
+  margin: 0 auto;
+  min-height: calc(100vh - 110px);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  padding: 16px 0 24px;
+}
+
+.home-header {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.home-logo {
+  font-size: 42px;
+  margin-bottom: 6px;
+}
+
+.home-header h1 {
+  margin: 0;
+  font-size: 26px;
+}
+
+.home-header p {
+  margin: 6px 0 0;
+  color: #9ca9a5;
+  font-size: 14px;
+}
+
+.home-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.home-menu-btn {
+  width: 100%;
+  min-height: 68px;
+
+  display: grid;
+  grid-template-columns: 42px 1fr 24px;
+  align-items: center;
+
+  padding: 12px 16px;
+
+  border: 1px solid #354740;
+  border-radius: 16px;
+
+  background: #1c2926;
+  color: #edf4f1;
+
+  cursor: pointer;
+  text-align: left;
+
+  transition: 0.15s ease;
+}
+
+.home-menu-btn:hover {
+  background: #243630;
+  border-color: #668b7e;
+}
+
+.home-menu-btn:active {
+  transform: scale(0.98);
+}
+
+.home-menu-icon {
+  font-size: 23px;
+}
+
+.home-menu-btn strong {
+  font-size: 16px;
+}
+
+.home-menu-arrow {
+  font-size: 28px;
+  color: #8fb3a6;
+  text-align: right;
+}
+
+
+/* ===== BACK HOME BUTTON ===== */
+
+.back-home-btn {
+  min-height: 42px;
+  margin-bottom: 12px;
+  padding: 8px 14px;
+
+  border: 1px solid #354740;
+  border-radius: 12px;
+
+  background: #1c2926;
+  color: #edf4f1;
+
+  font-weight: 700;
+  cursor: pointer;
+}
+
+
+/* ===== PHONE ===== */
+
+@media (max-width: 600px) {
+
+  .home-page {
+    min-height: calc(100dvh - 95px);
+    padding: 8px 0 16px;
+  }
+
+  .home-header {
+    margin-bottom: 16px;
+  }
+
+  .home-logo {
+    font-size: 36px;
+  }
+
+  .home-header h1 {
+    font-size: 23px;
+  }
+
+  .home-menu {
+    gap: 8px;
+  }
+
+  .home-menu-btn {
+    min-height: 60px;
+    padding: 9px 13px;
+    border-radius: 14px;
+  }
+
+  .home-menu-icon {
+    font-size: 21px;
+  }
+
+  .home-menu-btn strong {
+    font-size: 15px;
+  }
+}
