@@ -86,6 +86,14 @@
       <strong>Tổng hợp tuần</strong>
       <span class="home-menu-arrow">›</span>
     </button>
+    <button
+  class="home-menu-btn"
+  data-page="absence"
+>
+  <span class="home-menu-icon">📝</span>
+  <strong>Báo vắng</strong>
+  <span class="home-menu-arrow">›</span>
+</button>
 
     <button
       id="adminNavBtn"
@@ -96,6 +104,62 @@
       <strong>Thành viên</strong>
       <span class="home-menu-arrow">›</span>
     </button>
+
+  </div>
+
+</div>
+    <!-- ===== TRANG BÁO VẮNG ===== -->
+
+<div id="absencePage" class="app-page hidden">
+
+  <div class="card absence-card">
+
+    <h2>📝 Báo vắng</h2>
+
+    <div class="absence-form">
+
+      <label for="absenceDate">
+        Ngày vắng
+      </label>
+
+      <input
+        id="absenceDate"
+        type="date"
+      >
+
+      <label for="absenceReason">
+        Lý do
+      </label>
+
+      <textarea
+        id="absenceReason"
+        rows="4"
+        maxlength="500"
+        placeholder="Nhập lý do vắng..."
+      ></textarea>
+
+      <button
+        id="sendAbsenceBtn"
+        class="primary-btn"
+        type="button"
+      >
+        Gửi báo vắng
+      </button>
+
+      <p id="absenceMessage" class="message"></p>
+
+    </div>
+
+  </div>
+
+  <!-- Chỉ Admin sẽ thấy phần này -->
+  <div id="absenceHistoryCard" class="card hidden">
+
+    <h2>📚 Lịch sử báo vắng</h2>
+
+    <div id="absenceHistory">
+      <p>Đang tải...</p>
+    </div>
 
   </div>
 
