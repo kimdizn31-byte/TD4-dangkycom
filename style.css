@@ -1622,3 +1622,40 @@ body {
   background: #ffd0d0;
   color: #8b2020;
 }
+/* ===== FORM BÁO VẮNG ===== */
+
+.absence-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.absence-form label {
+  display: block;
+  font-weight: 700;
+  margin-top: 5px;
+}
+
+#absenceDate {
+  width: 100%;
+  max-width: 300px;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+#absenceReason {
+  display: block;
+  width: 100%;
+  min-height: 130px;
+  padding: 14px;
+  box-sizing: border-box;
+  resize: vertical;
+  font-size: 16px;
+  border-radius: 10px;
+}
+
+#sendAbsenceBtn {
+  width: 100%;
+  margin-top: 5px;
+  padding: 14px;
+}
