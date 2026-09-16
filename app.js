@@ -9,7 +9,7 @@ const supabaseClient = window.supabase.createClient(
 const $ = (id) => document.getElementById(id);
 
 let session = null;
-let currentWeekStart = getMonday(new Date());F
+let currentWeekStart = getMonday(new Date());
 let menuWeekStart = new Date(currentWeekStart);
 let weekRowsData = [];
 let myRegistrations = [];
