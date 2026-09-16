@@ -9,7 +9,7 @@ const supabaseClient = window.supabase.createClient(
 const $ = (id) => document.getElementById(id);
 
 let session = null;
-let currentWeekStart = getMonday(new Date());
+let currentWeekStart = getMonday(new Date());F
 let menuWeekStart = new Date(currentWeekStart);
 let weekRowsData = [];
 let myRegistrations = [];
@@ -622,13 +622,33 @@ function mealCell(date, meal) {
       data-date="${date}"
       data-meal="${meal}"
     >
-      <select name="${key}" class="meal-select">
-  <option value="Không ăn" selected>✕ Không ăn</option>
-  <option value="Đúng giờ">✓ Đúng giờ</option>
-  <option value="Ăn trễ">⏰ Ăn trễ</option>
-</select>
+      <select
+        name="${key}"
+        class="meal-select status-noeat"
+        onchange="updateMealSelectColor(this)"
+      >
+        <option value="Không ăn" selected>✕ Không ăn</option>
+        <option value="Đúng giờ">✓ Đúng giờ</option>
+        <option value="Ăn trễ">⏰ Ăn trễ</option>
+      </select>
     </div>
   `;
+}
+
+function updateMealSelectColor(select) {
+  select.classList.remove(
+    "status-ontime",
+    "status-late",
+    "status-noeat"
+  );
+
+  if (select.value === "Đúng giờ") {
+    select.classList.add("status-ontime");
+  } else if (select.value === "Ăn trễ") {
+    select.classList.add("status-late");
+  } else {
+    select.classList.add("status-noeat");
+  }
 }
 // ===============================
 // LOAD WEEK
@@ -695,6 +715,7 @@ function applyExistingSelections() {
     if (!select) return;
 
     select.value = row.status;
+    updateMealSelectColor(select);
   });
 }
 
