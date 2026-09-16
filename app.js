@@ -1309,6 +1309,11 @@ function renderWeeklySummary(members, registrations) {
     }`;
 }
 function openPage(page) {
+  const homePage = document.getElementById("homePage");
+
+if (homePage) {
+  homePage.classList.add("hidden");
+}
   document.querySelectorAll(".app-page").forEach((el) => {
     el.classList.add("hidden");
   });
@@ -1342,8 +1347,32 @@ function openPage(page) {
     activeBtn.classList.add("active");
   }
 }
+function goHome() {
+  document.querySelectorAll(".app-page").forEach((el) => {
+    el.classList.add("hidden");
+  });
 
-document.querySelectorAll(".nav-btn").forEach((btn) => {
+  const homePage = document.getElementById("homePage");
+
+  if (homePage) {
+    homePage.classList.remove("hidden");
+  }
+}
+
+document.querySelectorAll(".app-page").forEach((page) => {
+  if (page.querySelector(".back-home-btn")) return;
+
+  const button = document.createElement("button");
+
+  button.className = "back-home-btn";
+  button.innerHTML = "← Trang chủ";
+
+  button.addEventListener("click", goHome);
+
+  page.prepend(button);
+});
+
+document.querySelectorAll(".home-menu-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
     openPage(btn.dataset.page);
   });
